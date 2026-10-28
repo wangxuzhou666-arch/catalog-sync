@@ -1,0 +1,173 @@
+# catalog-sync as a stack: the scheduler, the Mock SaaS it reads from, Postgres and a reference
+# platform it loads into. Guide: docs/deploy.md. Run it from the repository root:
+#
+#   cp deploy/.env.example deploy/.env      # then give every variable a value
+#   docker compose -f deploy/compose.yaml up -d mock-saas mock-platform postgres
+#   docker compose -f deploy/compose.yaml run --rm login
+#   docker compose -f deploy/compose.yaml up -d
+#
+# Secrets: none is in this file. ${NAME:?...} reads NAME from deploy/.env (next to this file) and
+# stops compose with the message when it is empty; each service is handed only the ones it needs.
+# No port is published: the services reach each other by name on the stack's private networks, and
+# only the scheduler is on both: the mocks (and the login one-shot) cannot reach Postgres.
+
+name: catalog-sync
+
+# What every container made from the image shares. It is the same image four times over (the
+# scheduler, the login one-shot and the two mocks), so it is built once and tagged once.
+x-app: &app
+  image: ${CATALOG_SYNC_IMAGE:-catalog-sync:dev}
+  build:
+    context: ..
+    dockerfile: Dockerfile
+  read_only: true # the process writes to /data (a volume) and /tmp only
+  tmpfs: [/tmp]
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  # A runaway process or a fork bomb ends in its own container, not on the host. The scheduler, which
+  # resizes pictures, asks for more below.
+  mem_limit: 512m
+  pids_limit: 128
+
+services:
+  # The fake service the scheduler reads from. `--host 0.0.0.0` makes it refuse the public demo
+  # password, hence the account in the environment.
+  mock-saas:
+    <<: *app
+    command: [mock, serve, --host, 0.0.0.0, --port, "8765"]
+    networks: [sources]
+    environment:
+      MOCK_SAAS_USER: ${MOCK_SAAS_USER:?set it in deploy/.env}
+      MOCK_SAAS_PASSWORD: ${MOCK_SAAS_PASSWORD:?set it in deploy/.env}
+    healthcheck: # the built-in one asks "did a scheduled cycle finish?", which is not this
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/terms', timeout=3)
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  # The stand-in for your own platform: it implements docs/platform-contract.md and stores what it
+  # receives in sqlite, on its own volume.
+  mock-platform:
+    <<: *app
+    command: [mock, platform, serve, --host, 0.0.0.0, --port, "8780", --db, /data/platform.db]
+    networks: [sources]
+    environment:
+      PLATFORM_TOKEN: ${PLATFORM_TOKEN:?set it in deploy/.env}
+    volumes:
+      - platform-data:/data
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8780/health', timeout=3)
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  # The warehouse. The image is pinned by the digest of its multi-architecture index; to update,
+  # `docker buildx imagetools inspect postgres:16` and replace it. postgres-init.sh creates the
+  # restricted role and schema catalog-sync loads into, on the first start of an empty volume.
+  postgres:
+    image: postgres:16@sha256:9e2cf6287f25c3151f4c9421ccce2b17f3e60061c111a29165e0d2cdd9ff0a97
+    # Only the scheduler is on this network, and the network has no way out. The entrypoint drops from
+    # root to the postgres user by itself; nothing in the container needs to gain privileges.
+    networks: [warehouse]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 1g
+    pids_limit: 256
+    environment:
+      POSTGRES_DB: catalog
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set it in deploy/.env}
+      CATALOG_SYNC_DB_PASSWORD: ${CATALOG_SYNC_DB_PASSWORD:?set it in deploy/.env}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres-init.sh:/docker-entrypoint-initdb.d/10-catalog-sync-role.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --username postgres --dbname catalog"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  # The scheduler: one cycle (pull, normalize, load into Postgres and the platform) now, then one
+  # per hour, in the foreground, until it is stopped.
+  catalog-sync:
+    <<: *app
+    command: [schedule, mock-materials, --every, 1h]
+    networks: [sources, warehouse]
+    mem_limit: 1g # pictures are decoded and resized in memory
+    depends_on:
+      mock-saas: {condition: service_healthy}
+      mock-platform: {condition: service_healthy}
+      postgres: {condition: service_healthy}
+    environment:
+      PLATFORM_TOKEN: ${PLATFORM_TOKEN:?set it in deploy/.env}
+      # The role postgres-init.sh created, not the administrator. Reaches the container as an
+      # environment variable, which is where the config says to look (dsn_env).
+      WAREHOUSE_DSN: postgresql://catalog_sync:${CATALOG_SYNC_DB_PASSWORD:?set it in deploy/.env}@postgres:5432/catalog
+    volumes:
+      - catalog-data:/data
+      # The config is mounted read-only, never baked into the image. The mapping is the
+      # connector's own, packaged with it, so nothing is mounted for it.
+      - ./catalog-sync.compose.toml:/config/catalog-sync.toml:ro
+    # Restarts the scheduler when it exits non-zero, at most three times: it exits 1 after five failed
+    # cycles in a row (a fault that waiting did not clear) and 4 when the compliance declaration is
+    # missing or invalid, which no restart can fix. Docker cannot tell the two apart, so the cap
+    # bounds both: after the third restart the container stays down (`docker compose ps` shows
+    # Exited (4)) instead of looping. The count is for the life of the container and a run that
+    # lasted does not reset it; `docker compose up -d` after the fix starts it again.
+    # A stop (exit 0) is never restarted. Without Docker, systemd can exclude exit 4 only
+    # (RestartPreventExitStatus=4); see docs/deploy.md.
+    restart: on-failure:3
+    # A stop lets the cycle in progress finish before the process exits; Docker kills it after this.
+    # A killed run is resumable (`pull --resume`), but give a real catalog the time.
+    stop_grace_period: 15m
+    healthcheck: # healthy = a cycle finished successfully within twice the interval (2x-interval)
+      test: [CMD, catalog-sync, health, --profile, mock-materials]
+      interval: 60s
+      timeout: 15s
+      start_period: 5m
+      retries: 3
+
+  # The one-shot login, outside the scheduler: `docker compose run --rm login`. It stores the
+  # credential in the same /data; the scheduler's next cycle picks it up, with no restart. Anything
+  # after the service name replaces the default `mock --form`, e.g. `login mock --paste-curl -`.
+  login:
+    <<: *app
+    profiles: [tools]
+    entrypoint: [catalog-sync, login]
+    command: [mock, --form]
+    networks: [sources]
+    depends_on:
+      mock-saas: {condition: service_healthy}
+    environment:
+      MOCK_SAAS_USER: ${MOCK_SAAS_USER:?set it in deploy/.env}
+      MOCK_SAAS_PASSWORD: ${MOCK_SAAS_PASSWORD:?set it in deploy/.env}
+    volumes:
+      - catalog-data:/data
+      # The config is mounted read-only, never baked into the image. The mapping is the
+      # connector's own, packaged with it, so nothing is mounted for it.
+      - ./catalog-sync.compose.toml:/config/catalog-sync.toml:ro
+    healthcheck:
+      disable: true # a one-shot is not a scheduler: the built-in health check would fail it
+    restart: "no"
+
+networks:
+  # The services the scheduler reads from and writes to. A real source is reached over this one
+  # (it has the way out); the mocks have nothing to hide here and nothing to reach but each other.
+  sources:
+  # Postgres and its only client. `internal` cuts the way out to the internet and to the host.
+  warehouse:
+    internal: true
+
+volumes:
+  catalog-data: # state.sqlite, the cache, audit.jsonl and the credentials: back this up
+  platform-data:
+  postgres-data:

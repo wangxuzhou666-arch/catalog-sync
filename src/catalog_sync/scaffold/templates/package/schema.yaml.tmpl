@@ -1,0 +1,18 @@
+# What a record of the {{title}} connector holds.
+#
+# TODO(connector): replace the example fields with the ones your platform wants. `kind` is how a
+# sink stores a field (text, integer, real, timestamp or json); a json field says what it holds
+# with `of` (texts, money, composition, images or object). Bump schema_version when a field changes
+# meaning. `source`, `source_id`, `extra` and the provenance fields are added to every record, so
+# do not declare them here.
+version: 1
+entity: {{entity}}
+schema_version: 1
+key: [source, source_id]
+
+fields:
+  name: {kind: text}
+  status: {kind: text}
+  amount: {kind: real}
+  updated_at: {kind: timestamp}
+  images: {kind: json, of: images}

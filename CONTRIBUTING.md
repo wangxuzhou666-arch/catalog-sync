@@ -1,0 +1,157 @@
+# Contributing
+
+Thanks for looking. This project moves other people's data between systems, so the rules below
+are stricter than usual about what a change may contain. Most of them are enforced by a check you
+can run locally.
+
+## Set up
+
+```console
+$ uv sync
+$ uv run pre-commit install        # ruff, mypy, nesting depth, gitleaks, private-key and large-file checks
+```
+
+Python 3.11 or newer. `uv` installs the interpreter and the locked dependencies; nothing else is
+needed to run the tests, which never touch the network (the ones that start a Mock SaaS may reach
+`127.0.0.1`, and nothing else).
+
+## Run the checks
+
+```console
+$ uv run ruff check . && uv run ruff format --check .
+$ uv run mypy --strict src                              # the whole package type-checks
+$ uv run python tools/check_nesting.py src tools      # no block nested five or more levels deep
+$ uv run pytest -q                                    # sockets are disabled; every fixture is synthetic
+$ gitleaks detect --source . --config .gitleaks.toml  # tokens, local paths, personal emails, stray CJK
+```
+
+To run the suite on another interpreter: `uv run --python 3.11 pytest -q` (or `3.13`).
+
+The Postgres sink is tested against a real server. Start any throw-away Postgres, give the tests its
+address, and install the extra:
+
+```console
+$ uv sync --extra postgres
+$ CATALOG_SYNC_TEST_POSTGRES_DSN='postgresql://postgres:postgres@127.0.0.1:5432/postgres' \
+    uv run pytest -q -m postgres
+```
+
+The tests create one schema of their own and drop it at the end; use a server you can throw away. Without
+the variable they skip with a message saying so. CI runs them against a `postgres:16` service container
+and fails if they are skipped.
+
+## Code style
+
+The style standard is short and each rule has a reason; the ones that matter most here:
+
+- `try` wraps only the line that is expected to fail. A broad `except Exception` needs a stated reason
+  on its line (`# noqa: BLE001 - why`), and only the usual few reasons qualify (a side channel that must
+  not break the main flow, isolating one item of a batch, a top-level handler that logs the traceback).
+- Fail fast. Do not return `None` or a default to hide that something went wrong; raise a specific
+  error at the boundary where the bad input arrives.
+- Nesting depth stays below five (`tools/check_nesting.py`). Use a guard clause, extract a function, or
+  use a lookup table.
+- No abstraction with a single implementation. A Protocol or base class needs at least two real users.
+- Comments say *why*, not what. Names are plain and specific (`token_ids`, not `data`).
+
+## Tests: the gate rule
+
+A check that has never failed proves nothing, so **every new gate, lint rule, guard or validation
+needs a test that makes it fail**, in addition to the tests that make it pass:
+
+1. at least one input that must be rejected, and at least one that must be accepted (the accepted one
+   should be an *explicit exception the rule documents*, since that is the part a later change breaks
+   first);
+2. a run with the rule removed or reverted, which must turn the rejection test red, so the red is
+   proven to come from the rule and not from something else nearby;
+3. the sample inputs generated at run time when they look like secrets, so the test file does not trip
+   the scanners it is testing.
+
+The existing suites show the pattern: `tests/test_gates.py` (gitleaks rules and the nesting checker),
+`tests/test_sink_contract.py` (sink contract and the broken sinks that must fail it),
+`tests/test_gates.py` also holds the type gate's cases,
+`tests/test_redact.py` (masking and the canary), `tests/test_scrub_scan.py`. A pull request that adds a
+rule without such a test will be asked for one.
+
+## Writing a connector (a source plugin)
+
+A connector is a Python package that registers a source under the `catalog_sync.sources` entry-point
+group. Start with `catalog-sync new-connector NAME`, which writes one that already passes its own tests,
+and follow [docs/connector-guide.md](docs/connector-guide.md) from the browser's network tab to the first
+live pull; the interface is described in *Writing your own source or sink* in the README. Build on
+`catalog_sync.sdk` (options, connection, pagination, folder walk, pictures, credentials): what the shipped
+connectors and the scaffold share lives there, so the next one does not copy it again. Whatever it talks
+to, it must:
+
+1. **Declare its compliance defaults.** A connector that contacts a service is gated: it needs the
+   `[sources.NAME.compliance]` block, and it must read the `max_requests_per_minute` option that the CLI
+   passes and hold that rate through the shared `HttpClient` (do not write your own request loop;
+   `catalog_sync.sdk.Connection` wires it). Only
+   a connector that reads local files and makes no request may register under
+   `catalog_sync.local_sources`.
+2. **Use synthetic fixtures only.** Fixtures are generated by code (see `tests/fixtures/builders.py`),
+   with obviously fake names, codes and prices, hosts under `.invalid`, and tokens assembled at run time.
+3. **Never include a captured real response.** Not as a fixture, not trimmed, not "anonymised", not in
+   a docstring or an issue. Describe the *shape* of a response in code or prose and build an invented
+   one.
+4. **Not evade anything.** No anti-detection flags, no user-agent or IP rotation, no proxies, no
+   CAPTCHA solving, no reverse-engineering of request signatures. Back off on HTTP 429 (the shared
+   client does). If the service asks for a human, stop and let a human log in. Send the SDK's
+   `User-Agent` (`catalog-sync/<version> (+project URL)`) unchanged; a browser string is allowed only
+   as an exception listed, with its reason, in the User-Agent policy of
+   [docs/compliance.md](docs/compliance.md#user-agent-policy), and a test fails on one that is not.
+   Do not follow redirects yourself: the shared client never lets the library do it, and a picture
+   download follows one only through the picture rule. The full list is in
+   [docs/compliance.md](docs/compliance.md) and, for connector authors, in the
+   [connector guide](docs/connector-guide.md#rules-for-contributors).
+5. **Keep secrets out of everything.** Credentials come from the credential store or the environment;
+   never log a header, a token, a cookie or a URL with its query string; no email or account name in a
+   user-agent or a request body. Test it with a canary like `tests/test_redact.py` does.
+6. **Fail honestly.** An expired or rejected credential raises `AuthExpired` (exit code 2); a problem with
+   one item raises `ItemFailed` so the run can record it and go on (it ends with exit code 5, or 1 when
+   more than `--max-failed-ratio` of the fetched items failed); a response of the wrong shape raises
+   `SourceShapeError`. Never invent a value to fill a gap: leave it `None` and say why in `issues`.
+7. **Be verifiable.** Say in the README what has only been tested against fake data and what needs a
+   check against the real service, and add those steps to a live checklist. A connector that talks to a
+   real service keeps its own live checklist in its package docs.
+
+Core code never imports a plugin (`tests/test_architecture.py` enforces it), so a connector can live in
+its own package, public or private.
+
+`catalog_sync.plugins.mock` is the small complete example to read: two sources with different
+pagination, a credential kind with an HTTP login, a schema, a code table and mappings, all registered in
+`pyproject.toml`. A connector that talks to a real service is a package of its own under
+`connectors/<name>/` and is built on the same SDK. The tests of the mock, and the ones `new-connector`
+generates, show the pattern worth repeating: run the connector against a service that is itself generated
+from a seed, so the dataset is the oracle for what a correct pull must have stored (`catalog_sync.testing.oracle`), and move one clock for server and client
+(`catalog_sync.testing.world.ServiceWorld`) so that backoff, `Retry-After` and token expiry cost no time.
+
+## Writing an entity schema
+
+A schema (`catalog_sync.schema`) says what a record of one kind of thing consists of. Declare it in YAML
+next to your connector and register it under `catalog_sync.schemas`; do not add fields that mean
+something only to your platform to a shared schema, put them in your own. When a field changes meaning,
+bump `schema_version`. Run your sink through the contract suite on your schema too
+(`catalog_sync.testing.sink_contract.shape_of`), so every column of it is written and read back.
+
+## Writing a sink
+
+Implement `open`, `backup`, `upsert(batch, *, dry_run=False)` and `close`, register it under
+`catalog_sync.sinks`, and run your sink through `catalog_sync.testing.sink_contract`. The contract (only
+the owned fields are written, `keep_existing_if_null` keeps stored values, rows are never deleted, a
+backup comes before every load, a dry run writes nothing) is the same for every sink, and the suite
+checks it against real behaviour. Add tests for anything specific to your store, such as foreign-key
+cascades, and show that the contract suite fails against a sink that breaks each rule.
+
+## Before you open a pull request
+
+- Commits are small and the messages are conventional (`feat(scope): ...`, `fix: ...`, `docs: ...`)
+  and say why.
+- No absolute home-directory paths, no real company or person names, no email other than a GitHub
+  `noreply` address, no non-English text outside `README.zh-CN.md`. The gitleaks rules will catch most of it.
+- Docs in English. `README.zh-CN.md` is a translation of `README.md` and must keep its commands
+  identical (a test compares them).
+- If you add a command-line option, update the README's command reference and
+  the live checklist of the connector concerned if the live steps change.
+
+Report security problems privately, as described in [SECURITY.md](SECURITY.md).

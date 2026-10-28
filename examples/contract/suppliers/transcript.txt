@@ -1,0 +1,30 @@
+$ catalog-sync pull mock-suppliers
+run 20261027T091100Z-xxxxxx (mock.suppliers): complete
+  items: 4
+  list   : 4 done
+  detail : 4 done
+  assets : 4 done
+  fetched this time: 4 detail, 0 assets
+[exit 0]
+$ catalog-sync normalize mock-suppliers --mapping src/catalog_sync/plugins/mock/mappings/suppliers.yaml --out suppliers/normalized.jsonl
+normalized run 20261027T091100Z-xxxxxx (mock.suppliers): 4 record(s) -> suppliers/normalized.jsonl
+  issues: listed_at:unparseable x1
+[exit 0]
+$ catalog-sync load --sink suppliers-db --input suppliers/normalized.jsonl
+load -> suppliers-db (sqlite), written:
+  inserted 4, updated 0, unchanged 0
+  backup: mock.db.bak-<UTC-STAMP> (0 row(s) before)
+  sensitive fields (drop): contact_email
+[exit 0]
+$ catalog-sync load --sink suppliers-hashed --input suppliers/normalized.jsonl
+load -> suppliers-hashed (sqlite), written:
+  inserted 4, updated 0, unchanged 0
+  backup: mock.db.bak-<UTC-STAMP> (0 row(s) before)
+  sensitive fields (hash): contact_email
+[exit 0]
+$ catalog-sync load --sink platform --input suppliers/normalized.jsonl
+load -> platform (http), written:
+  inserted 4, updated 0, unchanged 0
+  backup: none taken: the rows live on the receiving platform, whose own backups and history are the way back (docs/platform-contract.md)
+  sensitive fields (drop): contact_email
+[exit 0]

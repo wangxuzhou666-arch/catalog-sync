@@ -1,0 +1,171 @@
+"""A synthetic {{title}}: invented items and a service that serves them.
+
+The service answers as the connector expects. Nothing here was captured from a real service,
+and nothing captured from one may ever be put here: describe the *shape* of what the service
+answers and invent the values. TODO(connector): when you change a path, a field name or the
+envelope in api.py, change this file the same way, then keep the tests green. Add a case for
+every oddity the real service turns out to have (a price of 0 in the listing, an empty list in
+the detail, a 429, an expired token).
+"""
+
+from __future__ import annotations
+
+import io
+import re
+from dataclasses import dataclass
+
+from catalog_sync.credentials.base import Credential, CredentialHandle
+from catalog_sync.models import JsonObject
+from catalog_sync.testing.fake_transport import FakeResponse, RecordedRequest, UnscriptedRequest
+from catalog_sync.testing.world import ServiceWorld
+from PIL import Image
+
+from {{package}}.api import DETAIL_PATH, LIST_PATH
+from {{package}}.settings import DEFAULT_BASE_URL
+
+BASE_URL = DEFAULT_BASE_URL
+{{fake_constants}}
+RENEWAL_HINT = "Renew it with: catalog-sync login {{name}}"
+MEDIA = re.compile(r"/media/(?P<item_id>[a-z0-9-]+)\.png")
+PICTURE_SIZE = 8
+
+
+# --- invented data --------------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class FakeItem:
+    id: str
+    name: str
+    status: str
+    amount: float
+    updated_at: str
+
+    @property
+    def image_path(self) -> str:
+        return f"/media/{self.id}.png"
+
+
+def generate_items(count: int = 7) -> tuple[FakeItem, ...]:
+    return tuple(
+        FakeItem(
+            id=f"item-{n:03d}",
+            name=f"Sample item {n}",
+            status="active" if n % 2 else "archived",
+            amount=10.0 + n / 2,
+            updated_at=f"2026-01-{n:02d}T09:00:00+00:00",
+        )
+        for n in range(1, count + 1)
+    )
+
+
+def list_row(item: FakeItem) -> JsonObject:
+    """What the listing says about an item: its picture, but not its status or amount."""
+    return {
+        "id": item.id,
+        "name": item.name,
+        "updated_at": item.updated_at,
+        "image_url": f"{BASE_URL}{item.image_path}",
+    }
+
+
+def detail_record(item: FakeItem) -> JsonObject:
+    """What the detail says: the status and amount, but no picture. Neither record has it all."""
+    return {
+        "id": item.id,
+        "name": item.name,
+        "status": item.status,
+        "amount": item.amount,
+        "updated_at": item.updated_at,
+    }
+
+
+def picture(item: FakeItem) -> bytes:
+    shade = sum(item.id.encode()) % 256
+    buffer = io.BytesIO()
+    Image.new("RGB", (PICTURE_SIZE, PICTURE_SIZE), (shade, 255 - shade, 128)).save(buffer, "PNG")
+    return buffer.getvalue()
+
+
+def expected_record(item: FakeItem) -> JsonObject:
+    """What a correct pull and normalize must have stored for `item`, derived from the data."""
+    return {
+        "source": "{{source_name}}",
+        "source_id": item.id,
+        "name": item.name,
+        "status": item.status,
+        "amount": item.amount,
+        "updated_at": item.updated_at,
+        "issues": [],
+        "images": [
+            {
+                "role": "thumb",
+                "source_url": f"{BASE_URL}{item.image_path}",
+                "local_path": f"assets/{item.id}+thumb.bin",
+                "width": PICTURE_SIZE,
+                "height": PICTURE_SIZE,
+            }
+        ],
+    }
+
+
+# --- the service ----------------------------------------------------------------------------------
+
+
+def envelope(data: JsonObject) -> JsonObject:
+    return {"state": True, "data": data}
+
+
+class FakeService:
+    def __init__(self, items: tuple[FakeItem, ...]) -> None:
+        self.items = items
+
+    def __call__(self, request: RecordedRequest) -> FakeResponse:
+{{fake_login}}
+        media = MEDIA.fullmatch(request.path)
+        if media:  # pictures come from a storage host: no login needed, none sent
+            return self._picture(media["item_id"])
+        if request.header(AUTH_HEADER) != AUTH_VALUE:
+            return FakeResponse(401)
+        if request.path == LIST_PATH:
+            return self._list(request)
+        detail = re.fullmatch(DETAIL_PATH.format(item_id="(?P<item_id>[a-z0-9-]+)"), request.path)
+        if detail:
+            return self._detail(detail["item_id"])
+        raise UnscriptedRequest(f"{request.method} {request.url}")
+
+{{fake_list}}
+
+{{fake_login_method}}
+
+    def _detail(self, item_id: str) -> FakeResponse:
+        item = next((i for i in self.items if i.id == item_id), None)
+        if item is None:
+            return FakeResponse(404)
+        return FakeResponse.json(envelope({"data": detail_record(item)}))
+
+    def _picture(self, item_id: str) -> FakeResponse:
+        item = next((i for i in self.items if i.id == item_id), None)
+        return FakeResponse(404) if item is None else FakeResponse(200, picture(item))
+
+
+class World(ServiceWorld):
+    """The fake service and a client wired together without a network, on one shared clock."""
+
+    def __init__(self, items: tuple[FakeItem, ...] | None = None) -> None:
+        self.service = FakeService(items or generate_items())
+        super().__init__(self.service)
+
+    def credential(self) -> Credential:
+        """What a login would have stored: the header the service expects."""
+        return Credential({AUTH_HEADER: AUTH_VALUE}, {}, None, None)
+
+    def stale_credential(self) -> Credential:
+        """A credential the service no longer accepts."""
+        return Credential({AUTH_HEADER: "stale"}, {}, None, None)
+
+    def handle(self) -> CredentialHandle:
+        return CredentialHandle("{{name}}", self.credential, RENEWAL_HINT)
+
+    def stale_handle(self) -> CredentialHandle:
+        return CredentialHandle("{{name}}", self.stale_credential, RENEWAL_HINT)

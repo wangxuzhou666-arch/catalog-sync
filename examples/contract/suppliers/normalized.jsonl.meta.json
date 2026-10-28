@@ -1,0 +1,64 @@
+{
+  "format": 1,
+  "source": "mock.suppliers",
+  "run_id": "20261027T091100Z-xxxxxx",
+  "mapping_sha256": "ff454dd6f870f2c88355c29c30963bb7074d56576f88901e9f030695e175a071",
+  "schema": {
+    "version": 1,
+    "entity": "supplier",
+    "schema_version": 1,
+    "key": [
+      "source",
+      "source_id"
+    ],
+    "fields": {
+      "name": {
+        "kind": "text"
+      },
+      "country": {
+        "kind": "text"
+      },
+      "rating": {
+        "kind": "real"
+      },
+      "lead_time_days": {
+        "kind": "integer"
+      },
+      "certifications": {
+        "kind": "json",
+        "of": "texts"
+      },
+      "contact_email": {
+        "kind": "text"
+      },
+      "address": {
+        "kind": "json",
+        "of": "object"
+      },
+      "listed_at": {
+        "kind": "timestamp"
+      }
+    }
+  },
+  "record_count": 4,
+  "owned": [
+    "address",
+    "certifications",
+    "contact_email",
+    "country",
+    "fetched_at",
+    "issues",
+    "lead_time_days",
+    "listed_at",
+    "name",
+    "rating",
+    "raw_ref",
+    "schema_version",
+    "source_version"
+  ],
+  "keep_existing_if_null": [],
+  "sensitive": [
+    "contact_email"
+  ],
+  "is_full_snapshot": true
+}

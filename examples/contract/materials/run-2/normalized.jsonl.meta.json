@@ -1,0 +1,88 @@
+{
+  "format": 1,
+  "source": "mock.materials",
+  "run_id": "20261027T090600Z-xxxxxx",
+  "mapping_sha256": "992e0718913dbe3752179364396c74702e3d349bdac7d0c391c28cfc94459d2b",
+  "schema": {
+    "version": 1,
+    "entity": "material",
+    "schema_version": 1,
+    "key": [
+      "source",
+      "source_id"
+    ],
+    "fields": {
+      "code": {
+        "kind": "text"
+      },
+      "name": {
+        "kind": "text"
+      },
+      "composition": {
+        "kind": "json",
+        "of": "composition"
+      },
+      "composition_raw": {
+        "kind": "text"
+      },
+      "weight_gsm": {
+        "kind": "real",
+        "parse": "gsm"
+      },
+      "width_cm": {
+        "kind": "real",
+        "parse": "width_cm"
+      },
+      "price": {
+        "kind": "json",
+        "of": "money"
+      },
+      "category": {
+        "kind": "text"
+      },
+      "use_cases": {
+        "kind": "json",
+        "of": "texts"
+      },
+      "tags": {
+        "kind": "json",
+        "of": "texts"
+      },
+      "supplier": {
+        "kind": "text"
+      },
+      "folder_paths": {
+        "kind": "json",
+        "of": "texts"
+      },
+      "images": {
+        "kind": "json",
+        "of": "images"
+      }
+    }
+  },
+  "record_count": 7,
+  "owned": [
+    "code",
+    "composition",
+    "composition_raw",
+    "extra",
+    "fetched_at",
+    "folder_paths",
+    "images",
+    "issues",
+    "name",
+    "price",
+    "raw_ref",
+    "schema_version",
+    "source_version",
+    "supplier",
+    "weight_gsm",
+    "width_cm"
+  ],
+  "keep_existing_if_null": [
+    "images"
+  ],
+  "sensitive": [],
+  "is_full_snapshot": true
+}

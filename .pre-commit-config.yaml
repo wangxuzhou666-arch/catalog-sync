@@ -1,0 +1,37 @@
+# Install once with: uv run pre-commit install
+# Local hooks go through `uv run --frozen` so they use the exact tool versions in uv.lock.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b # frozen: v5.0.0
+    hooks:
+      - id: check-added-large-files
+        args: [--maxkb=500]
+      - id: detect-private-key
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: ruff check
+        entry: uv run --frozen ruff check --fix
+        language: system
+        types: [python]
+      - id: ruff-format
+        name: ruff format
+        entry: uv run --frozen ruff format
+        language: system
+        types: [python]
+      - id: mypy
+        name: mypy --strict
+        entry: uv run --frozen mypy
+        language: system
+        files: ^src/.*\.py$
+        pass_filenames: false
+      - id: nesting
+        name: nesting depth < 5
+        entry: uv run --frozen python tools/check_nesting.py
+        language: system
+        files: ^(src|tools)/.*\.py$
+      - id: gitleaks
+        name: gitleaks (staged changes)
+        entry: gitleaks protect --staged --config .gitleaks.toml --redact --verbose
+        language: system
+        pass_filenames: false

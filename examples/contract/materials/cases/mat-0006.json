@@ -1,0 +1,425 @@
+{
+  "run_1": {
+    "raw_list_row": {
+      "id": "mat-0006",
+      "type": "material",
+      "code": "MOCK-0006",
+      "name": "Demo Knit 06",
+      "price": 0,
+      "currency": "USD",
+      "thumbnail_url": "http://127.0.0.1:8765/media/thumb/mat-0006.png",
+      "updated_at": "2026-01-01T00:06:00Z"
+    },
+    "raw_detail_response": {
+      "http_status": 200,
+      "body": {
+        "state": true,
+        "data": {
+          "data": {
+            "id": "mat-0006",
+            "code": "MOCK-0006",
+            "name": "Demo Knit 06",
+            "price": "44.39",
+            "currency": "USD",
+            "weight": "370 gsm",
+            "width": "57/58\"",
+            "composition": "80%EA/20%ZZ",
+            "supplier_id": "sup-004",
+            "supplier_name": "Example Knits Inc.",
+            "thumbs": [],
+            "swatch_url": "http://127.0.0.1:8765/media/swatch/mat-0006.jpg"
+          }
+        }
+      }
+    },
+    "normalized_record": {
+      "source": "mock.materials",
+      "source_id": "mat-0006",
+      "code": "MOCK-0006",
+      "name": "Demo Knit 06",
+      "composition": [
+        {
+          "fiber": "Elastane",
+          "percent": 80.0,
+          "raw": "80%EA"
+        },
+        {
+          "fiber": null,
+          "percent": 20.0,
+          "raw": "20%ZZ"
+        }
+      ],
+      "composition_raw": "80%EA/20%ZZ",
+      "weight_gsm": 370.0,
+      "width_cm": 146.1,
+      "price": {
+        "amount": "44.39",
+        "currency": "USD"
+      },
+      "category": null,
+      "use_cases": [],
+      "tags": [],
+      "supplier": "Example Knits Inc.",
+      "folder_paths": [
+        "Demo Knit/Jersey"
+      ],
+      "images": [
+        {
+          "role": "thumb",
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0006.png",
+          "local_path": "assets/mat-0006+thumb.bin",
+          "sha256": "00f8f8adcd10d4c1da80e40c7420db92cd4c106addef0192057eb458700cdc39",
+          "width": 96,
+          "height": 96,
+          "size_bytes": 3229
+        },
+        {
+          "role": "swatch",
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0006.jpg",
+          "local_path": "assets/mat-0006+swatch.bin",
+          "sha256": "16d5d60aa870b65cc5d2c04934f2d947b90cf289ae2aa10ba4b96824608882d0",
+          "width": 192,
+          "height": 192,
+          "size_bytes": 10601
+        }
+      ],
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-004"
+        }
+      },
+      "issues": [
+        "composition:unknown_code:ZZ"
+      ],
+      "source_version": "2026-01-01T00:06:00Z",
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0006",
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "normalized_at": "2026-10-27T09:02:00+00:00",
+      "schema_version": 1
+    },
+    "sqlite_row": {
+      "source": "mock.materials",
+      "source_id": "mat-0006",
+      "code": "MOCK-0006",
+      "composition": [
+        {
+          "fiber": "Elastane",
+          "percent": 80.0,
+          "raw": "80%EA"
+        },
+        {
+          "fiber": null,
+          "percent": 20.0,
+          "raw": "20%ZZ"
+        }
+      ],
+      "composition_raw": "80%EA/20%ZZ",
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-004"
+        }
+      },
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "folder_paths": [
+        "Demo Knit/Jersey"
+      ],
+      "images": [
+        {
+          "height": 96,
+          "local_path": "assets/mat-0006+thumb.bin",
+          "role": "thumb",
+          "sha256": "00f8f8adcd10d4c1da80e40c7420db92cd4c106addef0192057eb458700cdc39",
+          "size_bytes": 3229,
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0006.png",
+          "width": 96
+        },
+        {
+          "height": 192,
+          "local_path": "assets/mat-0006+swatch.bin",
+          "role": "swatch",
+          "sha256": "16d5d60aa870b65cc5d2c04934f2d947b90cf289ae2aa10ba4b96824608882d0",
+          "size_bytes": 10601,
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0006.jpg",
+          "width": 192
+        }
+      ],
+      "issues": [
+        "composition:unknown_code:ZZ"
+      ],
+      "name": "Demo Knit 06",
+      "price": {
+        "amount": "44.39",
+        "currency": "USD"
+      },
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0006",
+      "schema_version": 1,
+      "source_version": "2026-01-01T00:06:00Z",
+      "supplier": "Example Knits Inc.",
+      "weight_gsm": 370.0,
+      "width_cm": 146.1
+    },
+    "platform_row": {
+      "source": "mock.materials",
+      "source_id": "mat-0006",
+      "code": "MOCK-0006",
+      "composition": [
+        {
+          "fiber": "Elastane",
+          "percent": 80.0,
+          "raw": "80%EA"
+        },
+        {
+          "fiber": null,
+          "percent": 20.0,
+          "raw": "20%ZZ"
+        }
+      ],
+      "composition_raw": "80%EA/20%ZZ",
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-004"
+        }
+      },
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "folder_paths": [
+        "Demo Knit/Jersey"
+      ],
+      "images": [
+        {
+          "height": 96,
+          "local_path": "assets/mat-0006+thumb.bin",
+          "role": "thumb",
+          "sha256": "00f8f8adcd10d4c1da80e40c7420db92cd4c106addef0192057eb458700cdc39",
+          "size_bytes": 3229,
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0006.png",
+          "width": 96
+        },
+        {
+          "height": 192,
+          "local_path": "assets/mat-0006+swatch.bin",
+          "role": "swatch",
+          "sha256": "16d5d60aa870b65cc5d2c04934f2d947b90cf289ae2aa10ba4b96824608882d0",
+          "size_bytes": 10601,
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0006.jpg",
+          "width": 192
+        }
+      ],
+      "issues": [
+        "composition:unknown_code:ZZ"
+      ],
+      "name": "Demo Knit 06",
+      "price": {
+        "amount": "44.39",
+        "currency": "USD"
+      },
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0006",
+      "schema_version": 1,
+      "source_version": "2026-01-01T00:06:00Z",
+      "supplier": "Example Knits Inc.",
+      "weight_gsm": 370.0,
+      "width_cm": 146.1
+    }
+  },
+  "run_2": {
+    "raw_list_row": {
+      "id": "mat-0006",
+      "type": "material",
+      "code": "MOCK-0006",
+      "name": "Demo Knit 06",
+      "price": 0,
+      "currency": "USD",
+      "thumbnail_url": "http://127.0.0.1:8765/media/thumb/mat-0006.png",
+      "updated_at": "2026-01-01T00:06:00Z"
+    },
+    "raw_detail_response": null,
+    "normalized_record": {
+      "source": "mock.materials",
+      "source_id": "mat-0006",
+      "code": "MOCK-0006",
+      "name": "Demo Knit 06",
+      "composition": [
+        {
+          "fiber": "Elastane",
+          "percent": 80.0,
+          "raw": "80%EA"
+        },
+        {
+          "fiber": null,
+          "percent": 20.0,
+          "raw": "20%ZZ"
+        }
+      ],
+      "composition_raw": "80%EA/20%ZZ",
+      "weight_gsm": 370.0,
+      "width_cm": 146.1,
+      "price": {
+        "amount": "44.39",
+        "currency": "USD"
+      },
+      "category": null,
+      "use_cases": [],
+      "tags": [],
+      "supplier": "Example Knits Inc.",
+      "folder_paths": [
+        "Demo Knit/Jersey"
+      ],
+      "images": [
+        {
+          "role": "thumb",
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0006.png",
+          "local_path": "assets/mat-0006+thumb.bin",
+          "sha256": "00f8f8adcd10d4c1da80e40c7420db92cd4c106addef0192057eb458700cdc39",
+          "width": 96,
+          "height": 96,
+          "size_bytes": 3229
+        },
+        {
+          "role": "swatch",
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0006.jpg",
+          "local_path": "assets/mat-0006+swatch.bin",
+          "sha256": "16d5d60aa870b65cc5d2c04934f2d947b90cf289ae2aa10ba4b96824608882d0",
+          "width": 192,
+          "height": 192,
+          "size_bytes": 10601
+        }
+      ],
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-004"
+        }
+      },
+      "issues": [
+        "composition:unknown_code:ZZ"
+      ],
+      "source_version": "2026-01-01T00:06:00Z",
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0006",
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "normalized_at": "2026-10-27T09:07:00+00:00",
+      "schema_version": 1
+    },
+    "sqlite_row": {
+      "source": "mock.materials",
+      "source_id": "mat-0006",
+      "code": "MOCK-0006",
+      "composition": [
+        {
+          "fiber": "Elastane",
+          "percent": 80.0,
+          "raw": "80%EA"
+        },
+        {
+          "fiber": null,
+          "percent": 20.0,
+          "raw": "20%ZZ"
+        }
+      ],
+      "composition_raw": "80%EA/20%ZZ",
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-004"
+        }
+      },
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "folder_paths": [
+        "Demo Knit/Jersey"
+      ],
+      "images": [
+        {
+          "height": 96,
+          "local_path": "assets/mat-0006+thumb.bin",
+          "role": "thumb",
+          "sha256": "00f8f8adcd10d4c1da80e40c7420db92cd4c106addef0192057eb458700cdc39",
+          "size_bytes": 3229,
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0006.png",
+          "width": 96
+        },
+        {
+          "height": 192,
+          "local_path": "assets/mat-0006+swatch.bin",
+          "role": "swatch",
+          "sha256": "16d5d60aa870b65cc5d2c04934f2d947b90cf289ae2aa10ba4b96824608882d0",
+          "size_bytes": 10601,
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0006.jpg",
+          "width": 192
+        }
+      ],
+      "issues": [
+        "composition:unknown_code:ZZ"
+      ],
+      "name": "Demo Knit 06",
+      "price": {
+        "amount": "44.39",
+        "currency": "USD"
+      },
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0006",
+      "schema_version": 1,
+      "source_version": "2026-01-01T00:06:00Z",
+      "supplier": "Example Knits Inc.",
+      "weight_gsm": 370.0,
+      "width_cm": 146.1,
+      "ops_note": null
+    },
+    "platform_row": {
+      "source": "mock.materials",
+      "source_id": "mat-0006",
+      "code": "MOCK-0006",
+      "composition": [
+        {
+          "fiber": "Elastane",
+          "percent": 80.0,
+          "raw": "80%EA"
+        },
+        {
+          "fiber": null,
+          "percent": 20.0,
+          "raw": "20%ZZ"
+        }
+      ],
+      "composition_raw": "80%EA/20%ZZ",
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-004"
+        }
+      },
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "folder_paths": [
+        "Demo Knit/Jersey"
+      ],
+      "images": [
+        {
+          "height": 96,
+          "local_path": "assets/mat-0006+thumb.bin",
+          "role": "thumb",
+          "sha256": "00f8f8adcd10d4c1da80e40c7420db92cd4c106addef0192057eb458700cdc39",
+          "size_bytes": 3229,
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0006.png",
+          "width": 96
+        },
+        {
+          "height": 192,
+          "local_path": "assets/mat-0006+swatch.bin",
+          "role": "swatch",
+          "sha256": "16d5d60aa870b65cc5d2c04934f2d947b90cf289ae2aa10ba4b96824608882d0",
+          "size_bytes": 10601,
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0006.jpg",
+          "width": 192
+        }
+      ],
+      "issues": [
+        "composition:unknown_code:ZZ"
+      ],
+      "name": "Demo Knit 06",
+      "price": {
+        "amount": "44.39",
+        "currency": "USD"
+      },
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0006",
+      "schema_version": 1,
+      "source_version": "2026-01-01T00:06:00Z",
+      "supplier": "Example Knits Inc.",
+      "weight_gsm": 370.0,
+      "width_cm": 146.1,
+      "ops_note": null
+    }
+  }
+}

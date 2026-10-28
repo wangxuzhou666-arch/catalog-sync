@@ -1,0 +1,52 @@
+# The config of the compose stack (compose.yaml mounts it at /config/catalog-sync.toml, read-only).
+# Same shape as catalog-sync.example.toml; what differs is where things live in the container:
+#   /data     the workspace: state, cache, audit log, credentials (a volume)
+#   /config   this file
+# Relative paths resolve against /config, so everything outside it is written absolute.
+# No secret is in this file: the sinks name the environment variables that hold theirs.
+
+[workspace]
+home = "/data"
+
+# The Mock SaaS, reached by its service name on the stack's private network. It is a networked
+# source, so it passes the compliance gate like a real one. For a real service, replace this table
+# and the next (docs/deploy.md, "Pointing it at a real service").
+[sources.mock-materials]
+plugin = "mock.materials"
+credential = "mock"
+base_url = "http://mock-saas:8765"
+page_size = 10
+request_gap_s = 0.02
+
+[sources.mock-materials.compliance]
+data_owner = "Demo Co (the mock's invented data)"
+authorization = "own_account"
+authorization_ref = "demo/mock-saas"
+tos_url = "http://mock-saas:8765/terms"
+tos_reviewed_on = 2026-10-26
+max_requests_per_minute = 3000
+retention_days = 7
+
+[credentials.mock]
+base_url = "http://mock-saas:8765"
+
+# Two sinks: the warehouse (Postgres, as the restricted role postgres-init.sh creates) and the
+# platform (HTTP). The connection string and the token come from the environment of the container.
+[sinks.warehouse]
+kind = "postgres"
+dsn_env = "WAREHOUSE_DSN"
+schema = "catalog"
+table = "materials"
+
+# Plain http is refused beyond loopback unless allowed: here the traffic never leaves the stack's
+# private network. A platform on a real network gets an https:// url and no allow_plain_http.
+[sinks.platform]
+kind = "http"
+url = "http://mock-platform:8780/api/v1/ingest"
+auth_header_env = "PLATFORM_TOKEN"
+allow_plain_http = true
+
+[profiles.mock-materials]
+source = "mock-materials"
+sinks = ["warehouse", "platform"]
+incremental = true

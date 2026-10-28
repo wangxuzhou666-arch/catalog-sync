@@ -1,0 +1,145 @@
+# Copy to ./catalog-sync.toml (git-ignored) and adjust. Relative paths resolve against this file.
+# Credentials never go in this file: they come from environment variables or from 0600 files in
+# the workspace.
+
+[workspace]
+# State database, snapshot cache and credentials live here, outside any repository.
+home = "~/.local/share/catalog-sync"
+
+# A source is a named instance of a source plugin; every key except `plugin` and `compliance` is
+# that plugin's own option. The credential-free demo replays a stored snapshot instead of calling
+# a service, so it needs no compliance declaration (it is still written to the audit log).
+[sources.demo]
+plugin = "replay"
+path = "examples/synthetic"
+
+# The built-in Mock SaaS (`catalog-sync mock serve`): a fake service with invented data, for trying the
+# whole pipeline with no account. It is a networked source, so it passes the compliance gate like a
+# real one; the block below is filled in for the demo (the mock is yours, and its terms are the page
+# it serves at /terms). Log in first: `catalog-sync login mock --form`.
+[sources.mock-materials]
+plugin = "mock.materials"
+credential = "mock"
+base_url = "http://127.0.0.1:8765"
+page_size = 10                      # small on purpose, so even the demo spans several pages
+request_gap_s = 0.02                # a floor between requests; at least 60 / max_requests_per_minute
+
+# Every source that contacts a service must declare, in code the tool checks, who owns the data,
+# on what authority it is read, which terms were reviewed, and how fast the service may be called.
+# Without a complete, valid block `pull`, `inspect` and `run` stop before any request is made
+# (exit code 4). The values below are the demo's own: for any other service replace every one with
+# the truth about YOUR use. The tool checks that the block is there and consistent; it cannot check
+# that it is honest.
+[sources.mock-materials.compliance]
+data_owner = "Demo Co (the mock's invented data)"  # the organisation whose data this is
+authorization = "own_account"               # own_account | customer_authorized | contract | public_data
+authorization_ref = "demo/mock-saas"        # WHERE the grant is recorded (a pointer, not its content)
+tos_url = "http://127.0.0.1:8765/terms"     # the terms you reviewed
+tos_reviewed_on = 2026-10-26                # when; a warning appears once it is older than 180 days
+max_requests_per_minute = 3000              # a sliding-window ceiling on every request (a local fake takes 3000)
+retention_days = 7                          # how long the raw cache may be kept; `cache purge` enforces it
+# tos_review_max_age_days = 180             # how old tos_reviewed_on may get before the warning
+
+[sources.mock-suppliers]
+plugin = "mock.suppliers"
+credential = "mock"
+base_url = "http://127.0.0.1:8765"
+page_size = 4                       # cursor pagination: no total, so the walk ends on a null cursor
+request_gap_s = 0.02
+
+[sources.mock-suppliers.compliance]
+data_owner = "Demo Co (the mock's invented data)"
+authorization = "own_account"
+authorization_ref = "demo/mock-saas"
+tos_url = "http://127.0.0.1:8765/terms"
+tos_reviewed_on = 2026-10-26
+max_requests_per_minute = 3000
+retention_days = 7
+
+# The mock's login is a plain HTTP post (`login mock --form`); `--browser` and `--paste-curl` work too.
+# The account comes from MOCK_SAAS_USER / MOCK_SAAS_PASSWORD, else the mock's public demo account.
+[credentials.mock]
+base_url = "http://127.0.0.1:8765"
+
+# A sink is a named instance of a sink kind: jsonl, csv, sqlite, postgres or http. `sensitive_fields` says
+# what happens to fields a mapping marks `sensitive: true`: "drop" (default, they are not written),
+# "hash" (a salted sha256, stable within this workspace) or "keep" (written as they are).
+#
+# Where a file sink writes: `{workspace}/` at the start of `path` means the workspace in effect
+# (--workspace, else $CATALOG_SYNC_HOME, else `home` above, else the default), so the output sits
+# next to the state and cache, outside this checkout. Any other relative path resolves against this
+# file's directory. Do not point a sink at a folder that iCloud, Dropbox or OneDrive syncs: the rows
+# would leave the machine.
+[sinks.local]
+kind = "sqlite"
+path = "{workspace}/out/catalog.db"
+# table = "materials"
+# sensitive_fields = "drop"
+
+# Postgres needs the extra (`pip install 'catalog-sync[postgres]'`). The connection string, which may
+# carry a password, is never written here: name the environment variable that holds it. Before each
+# load the rows it will change are copied into <table>__backup_<timestamp> in the same schema.
+# [sinks.warehouse]
+# kind = "postgres"
+# dsn_env = "WAREHOUSE_DSN"
+# schema = "public"
+# table = "materials"
+
+# Your own platform, over HTTP: batches of JSON, idempotent, owned fields only, never a delete
+# (docs/platform-contract.md). The token is never written here: name the environment variable that
+# holds it. Plain http:// is accepted for the machine's own loopback address only.
+# [sinks.platform]
+# kind = "http"
+# url = "https://platform.example/api/ingest"
+# auth_header_env = "PLATFORM_TOKEN"
+# batch_size = 100
+
+# The same sink pointed at the reference platform of the demo (`catalog-sync mock platform serve`),
+# which accepts the public demo token when PLATFORM_TOKEN is not set for it.
+[sinks.mock-platform]
+kind = "http"
+url = "http://127.0.0.1:8780/api/v1/ingest"
+auth_header_env = "PLATFORM_TOKEN"
+
+# Two entities, two tables: a sink writes the rows of one schema. `contact_email` of a supplier is
+# marked sensitive in its mapping, so it is dropped here unless this sink says sensitive_fields = "hash".
+[sinks.mock-materials-db]
+kind = "sqlite"
+path = "{workspace}/out/mock.db"
+table = "materials"
+
+[sinks.mock-suppliers-db]
+kind = "sqlite"
+path = "{workspace}/out/mock.db"
+table = "suppliers"
+
+[sinks.export-jsonl]
+kind = "jsonl"
+path = "{workspace}/out/catalog.jsonl"
+
+[sinks.export-csv]
+kind = "csv"
+path = "{workspace}/out/catalog.csv"
+
+# A profile ties a source, a mapping and sinks together for `catalog-sync run <profile>`:
+# pull, then normalize from the cache, then load every sink.
+#
+# `mapping` is optional. Left out, the profile uses the mapping its source's connector ships inside
+# its own package, so it works from an installed wheel, where there is no source tree to point at.
+# The replay source is no connector (it replays any snapshot), so the demo below names one; the
+# path is relative to this file, which is why the offline demo needs a checkout.
+[profiles.demo]
+source = "demo"
+mapping = "src/catalog_sync/plugins/mock/mappings/materials.yaml"
+sinks = ["local", "export-jsonl", "export-csv"]
+incremental = true
+
+[profiles.mock-materials]
+source = "mock-materials"
+sinks = ["mock-materials-db"]
+incremental = true
+
+[profiles.mock-suppliers]
+source = "mock-suppliers"
+sinks = ["mock-suppliers-db"]
+incremental = true

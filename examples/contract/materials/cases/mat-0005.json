@@ -1,0 +1,425 @@
+{
+  "run_1": {
+    "raw_list_row": {
+      "id": "mat-0005",
+      "type": "material",
+      "code": "MOCK-0005",
+      "name": "Demo Knit 05",
+      "price": 0,
+      "currency": "USD",
+      "thumbnail_url": "http://127.0.0.1:8765/media/thumb/mat-0005.png",
+      "updated_at": "2026-01-01T00:05:00Z"
+    },
+    "raw_detail_response": {
+      "http_status": 200,
+      "body": {
+        "state": true,
+        "data": {
+          "data": {
+            "id": "mat-0005",
+            "code": "MOCK-0005",
+            "name": "Demo Knit 05",
+            "price": "44.59",
+            "currency": "USD",
+            "weight": "370 gsm",
+            "width": "wide",
+            "composition": "95%LI/5%VI",
+            "supplier_id": "sup-004",
+            "supplier_name": "Example Knits Inc.",
+            "thumbs": [],
+            "swatch_url": "http://127.0.0.1:8765/media/swatch/mat-0005.jpg"
+          }
+        }
+      }
+    },
+    "normalized_record": {
+      "source": "mock.materials",
+      "source_id": "mat-0005",
+      "code": "MOCK-0005",
+      "name": "Demo Knit 05",
+      "composition": [
+        {
+          "fiber": "Linen",
+          "percent": 95.0,
+          "raw": "95%LI"
+        },
+        {
+          "fiber": "Viscose",
+          "percent": 5.0,
+          "raw": "5%VI"
+        }
+      ],
+      "composition_raw": "95%LI/5%VI",
+      "weight_gsm": 370.0,
+      "width_cm": null,
+      "price": {
+        "amount": "44.59",
+        "currency": "USD"
+      },
+      "category": null,
+      "use_cases": [],
+      "tags": [],
+      "supplier": "Example Knits Inc.",
+      "folder_paths": [
+        "Demo Knit"
+      ],
+      "images": [
+        {
+          "role": "thumb",
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0005.png",
+          "local_path": "assets/mat-0005+thumb.bin",
+          "sha256": "1216d5fc94e9c72e926ba215a3fa4e05e1530b6e487b4caac5bfa05873d3c33d",
+          "width": 96,
+          "height": 96,
+          "size_bytes": 3008
+        },
+        {
+          "role": "swatch",
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0005.jpg",
+          "local_path": "assets/mat-0005+swatch.bin",
+          "sha256": "adfeac23448c3b7928fd49717ca9b8f43b12b546071120537d422da307a3b642",
+          "width": 192,
+          "height": 192,
+          "size_bytes": 11355
+        }
+      ],
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-004"
+        }
+      },
+      "issues": [
+        "width_cm:unparseable"
+      ],
+      "source_version": "2026-01-01T00:05:00Z",
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0005",
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "normalized_at": "2026-10-27T09:02:00+00:00",
+      "schema_version": 1
+    },
+    "sqlite_row": {
+      "source": "mock.materials",
+      "source_id": "mat-0005",
+      "code": "MOCK-0005",
+      "composition": [
+        {
+          "fiber": "Linen",
+          "percent": 95.0,
+          "raw": "95%LI"
+        },
+        {
+          "fiber": "Viscose",
+          "percent": 5.0,
+          "raw": "5%VI"
+        }
+      ],
+      "composition_raw": "95%LI/5%VI",
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-004"
+        }
+      },
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "folder_paths": [
+        "Demo Knit"
+      ],
+      "images": [
+        {
+          "height": 96,
+          "local_path": "assets/mat-0005+thumb.bin",
+          "role": "thumb",
+          "sha256": "1216d5fc94e9c72e926ba215a3fa4e05e1530b6e487b4caac5bfa05873d3c33d",
+          "size_bytes": 3008,
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0005.png",
+          "width": 96
+        },
+        {
+          "height": 192,
+          "local_path": "assets/mat-0005+swatch.bin",
+          "role": "swatch",
+          "sha256": "adfeac23448c3b7928fd49717ca9b8f43b12b546071120537d422da307a3b642",
+          "size_bytes": 11355,
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0005.jpg",
+          "width": 192
+        }
+      ],
+      "issues": [
+        "width_cm:unparseable"
+      ],
+      "name": "Demo Knit 05",
+      "price": {
+        "amount": "44.59",
+        "currency": "USD"
+      },
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0005",
+      "schema_version": 1,
+      "source_version": "2026-01-01T00:05:00Z",
+      "supplier": "Example Knits Inc.",
+      "weight_gsm": 370.0,
+      "width_cm": null
+    },
+    "platform_row": {
+      "source": "mock.materials",
+      "source_id": "mat-0005",
+      "code": "MOCK-0005",
+      "composition": [
+        {
+          "fiber": "Linen",
+          "percent": 95.0,
+          "raw": "95%LI"
+        },
+        {
+          "fiber": "Viscose",
+          "percent": 5.0,
+          "raw": "5%VI"
+        }
+      ],
+      "composition_raw": "95%LI/5%VI",
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-004"
+        }
+      },
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "folder_paths": [
+        "Demo Knit"
+      ],
+      "images": [
+        {
+          "height": 96,
+          "local_path": "assets/mat-0005+thumb.bin",
+          "role": "thumb",
+          "sha256": "1216d5fc94e9c72e926ba215a3fa4e05e1530b6e487b4caac5bfa05873d3c33d",
+          "size_bytes": 3008,
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0005.png",
+          "width": 96
+        },
+        {
+          "height": 192,
+          "local_path": "assets/mat-0005+swatch.bin",
+          "role": "swatch",
+          "sha256": "adfeac23448c3b7928fd49717ca9b8f43b12b546071120537d422da307a3b642",
+          "size_bytes": 11355,
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0005.jpg",
+          "width": 192
+        }
+      ],
+      "issues": [
+        "width_cm:unparseable"
+      ],
+      "name": "Demo Knit 05",
+      "price": {
+        "amount": "44.59",
+        "currency": "USD"
+      },
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0005",
+      "schema_version": 1,
+      "source_version": "2026-01-01T00:05:00Z",
+      "supplier": "Example Knits Inc.",
+      "weight_gsm": 370.0,
+      "width_cm": null
+    }
+  },
+  "run_2": {
+    "raw_list_row": {
+      "id": "mat-0005",
+      "type": "material",
+      "code": "MOCK-0005",
+      "name": "Demo Knit 05",
+      "price": 0,
+      "currency": "USD",
+      "thumbnail_url": "http://127.0.0.1:8765/media/thumb/mat-0005.png",
+      "updated_at": "2026-01-01T00:05:00Z"
+    },
+    "raw_detail_response": null,
+    "normalized_record": {
+      "source": "mock.materials",
+      "source_id": "mat-0005",
+      "code": "MOCK-0005",
+      "name": "Demo Knit 05",
+      "composition": [
+        {
+          "fiber": "Linen",
+          "percent": 95.0,
+          "raw": "95%LI"
+        },
+        {
+          "fiber": "Viscose",
+          "percent": 5.0,
+          "raw": "5%VI"
+        }
+      ],
+      "composition_raw": "95%LI/5%VI",
+      "weight_gsm": 370.0,
+      "width_cm": null,
+      "price": {
+        "amount": "44.59",
+        "currency": "USD"
+      },
+      "category": null,
+      "use_cases": [],
+      "tags": [],
+      "supplier": "Example Knits Inc.",
+      "folder_paths": [
+        "Demo Knit"
+      ],
+      "images": [
+        {
+          "role": "thumb",
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0005.png",
+          "local_path": "assets/mat-0005+thumb.bin",
+          "sha256": "1216d5fc94e9c72e926ba215a3fa4e05e1530b6e487b4caac5bfa05873d3c33d",
+          "width": 96,
+          "height": 96,
+          "size_bytes": 3008
+        },
+        {
+          "role": "swatch",
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0005.jpg",
+          "local_path": "assets/mat-0005+swatch.bin",
+          "sha256": "adfeac23448c3b7928fd49717ca9b8f43b12b546071120537d422da307a3b642",
+          "width": 192,
+          "height": 192,
+          "size_bytes": 11355
+        }
+      ],
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-004"
+        }
+      },
+      "issues": [
+        "width_cm:unparseable"
+      ],
+      "source_version": "2026-01-01T00:05:00Z",
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0005",
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "normalized_at": "2026-10-27T09:07:00+00:00",
+      "schema_version": 1
+    },
+    "sqlite_row": {
+      "source": "mock.materials",
+      "source_id": "mat-0005",
+      "code": "MOCK-0005",
+      "composition": [
+        {
+          "fiber": "Linen",
+          "percent": 95.0,
+          "raw": "95%LI"
+        },
+        {
+          "fiber": "Viscose",
+          "percent": 5.0,
+          "raw": "5%VI"
+        }
+      ],
+      "composition_raw": "95%LI/5%VI",
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-004"
+        }
+      },
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "folder_paths": [
+        "Demo Knit"
+      ],
+      "images": [
+        {
+          "height": 96,
+          "local_path": "assets/mat-0005+thumb.bin",
+          "role": "thumb",
+          "sha256": "1216d5fc94e9c72e926ba215a3fa4e05e1530b6e487b4caac5bfa05873d3c33d",
+          "size_bytes": 3008,
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0005.png",
+          "width": 96
+        },
+        {
+          "height": 192,
+          "local_path": "assets/mat-0005+swatch.bin",
+          "role": "swatch",
+          "sha256": "adfeac23448c3b7928fd49717ca9b8f43b12b546071120537d422da307a3b642",
+          "size_bytes": 11355,
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0005.jpg",
+          "width": 192
+        }
+      ],
+      "issues": [
+        "width_cm:unparseable"
+      ],
+      "name": "Demo Knit 05",
+      "price": {
+        "amount": "44.59",
+        "currency": "USD"
+      },
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0005",
+      "schema_version": 1,
+      "source_version": "2026-01-01T00:05:00Z",
+      "supplier": "Example Knits Inc.",
+      "weight_gsm": 370.0,
+      "width_cm": null,
+      "ops_note": null
+    },
+    "platform_row": {
+      "source": "mock.materials",
+      "source_id": "mat-0005",
+      "code": "MOCK-0005",
+      "composition": [
+        {
+          "fiber": "Linen",
+          "percent": 95.0,
+          "raw": "95%LI"
+        },
+        {
+          "fiber": "Viscose",
+          "percent": 5.0,
+          "raw": "5%VI"
+        }
+      ],
+      "composition_raw": "95%LI/5%VI",
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-004"
+        }
+      },
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "folder_paths": [
+        "Demo Knit"
+      ],
+      "images": [
+        {
+          "height": 96,
+          "local_path": "assets/mat-0005+thumb.bin",
+          "role": "thumb",
+          "sha256": "1216d5fc94e9c72e926ba215a3fa4e05e1530b6e487b4caac5bfa05873d3c33d",
+          "size_bytes": 3008,
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0005.png",
+          "width": 96
+        },
+        {
+          "height": 192,
+          "local_path": "assets/mat-0005+swatch.bin",
+          "role": "swatch",
+          "sha256": "adfeac23448c3b7928fd49717ca9b8f43b12b546071120537d422da307a3b642",
+          "size_bytes": 11355,
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0005.jpg",
+          "width": 192
+        }
+      ],
+      "issues": [
+        "width_cm:unparseable"
+      ],
+      "name": "Demo Knit 05",
+      "price": {
+        "amount": "44.59",
+        "currency": "USD"
+      },
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0005",
+      "schema_version": 1,
+      "source_version": "2026-01-01T00:05:00Z",
+      "supplier": "Example Knits Inc.",
+      "weight_gsm": 370.0,
+      "width_cm": null,
+      "ops_note": null
+    }
+  }
+}

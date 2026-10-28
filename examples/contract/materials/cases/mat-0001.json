@@ -1,0 +1,401 @@
+{
+  "run_1": {
+    "raw_list_row": {
+      "id": "mat-0001",
+      "type": "material",
+      "code": "MOCK-0001",
+      "name": "Demo Plain 01",
+      "price": 0,
+      "currency": "USD",
+      "thumbnail_url": "http://127.0.0.1:8765/media/thumb/mat-0001.png",
+      "updated_at": "2026-01-01T00:01:00Z"
+    },
+    "raw_detail_response": {
+      "http_status": 200,
+      "body": {
+        "state": true,
+        "data": {
+          "data": {
+            "id": "mat-0001",
+            "code": "MOCK-0001",
+            "name": "Demo Plain 01",
+            "price": "34.22",
+            "currency": "USD",
+            "weight": "290 gsm",
+            "width": "148",
+            "composition": "50%WO/50%PA",
+            "supplier_id": "sup-001",
+            "supplier_name": "Demo Mill Co.",
+            "thumbs": [],
+            "swatch_url": "http://127.0.0.1:8765/media/swatch/mat-0001.jpg"
+          }
+        }
+      }
+    },
+    "normalized_record": {
+      "source": "mock.materials",
+      "source_id": "mat-0001",
+      "code": "MOCK-0001",
+      "name": "Demo Plain 01",
+      "composition": [
+        {
+          "fiber": "Wool",
+          "percent": 50.0,
+          "raw": "50%WO"
+        },
+        {
+          "fiber": "Polyamide",
+          "percent": 50.0,
+          "raw": "50%PA"
+        }
+      ],
+      "composition_raw": "50%WO/50%PA",
+      "weight_gsm": 290.0,
+      "width_cm": 148.0,
+      "price": {
+        "amount": "34.22",
+        "currency": "USD"
+      },
+      "category": null,
+      "use_cases": [],
+      "tags": [],
+      "supplier": "Demo Mill Co.",
+      "folder_paths": [],
+      "images": [
+        {
+          "role": "thumb",
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0001.png",
+          "local_path": "assets/mat-0001+thumb.bin",
+          "sha256": "1aaed578b1ffab755560d16bd573947e1040be557e2ef6f8b3c94437862f793a",
+          "width": 96,
+          "height": 96,
+          "size_bytes": 1682
+        },
+        {
+          "role": "swatch",
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0001.jpg",
+          "local_path": "assets/mat-0001+swatch.bin",
+          "sha256": "ab2eadb54eebc50db1da1a3696bf74b62545efd0529f789787cf4d0fd0d7a866",
+          "width": 192,
+          "height": 192,
+          "size_bytes": 6007
+        }
+      ],
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-001"
+        }
+      },
+      "issues": [],
+      "source_version": "2026-01-01T00:01:00Z",
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0001",
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "normalized_at": "2026-10-27T09:02:00+00:00",
+      "schema_version": 1
+    },
+    "sqlite_row": {
+      "source": "mock.materials",
+      "source_id": "mat-0001",
+      "code": "MOCK-0001",
+      "composition": [
+        {
+          "fiber": "Wool",
+          "percent": 50.0,
+          "raw": "50%WO"
+        },
+        {
+          "fiber": "Polyamide",
+          "percent": 50.0,
+          "raw": "50%PA"
+        }
+      ],
+      "composition_raw": "50%WO/50%PA",
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-001"
+        }
+      },
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "folder_paths": [],
+      "images": [
+        {
+          "height": 96,
+          "local_path": "assets/mat-0001+thumb.bin",
+          "role": "thumb",
+          "sha256": "1aaed578b1ffab755560d16bd573947e1040be557e2ef6f8b3c94437862f793a",
+          "size_bytes": 1682,
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0001.png",
+          "width": 96
+        },
+        {
+          "height": 192,
+          "local_path": "assets/mat-0001+swatch.bin",
+          "role": "swatch",
+          "sha256": "ab2eadb54eebc50db1da1a3696bf74b62545efd0529f789787cf4d0fd0d7a866",
+          "size_bytes": 6007,
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0001.jpg",
+          "width": 192
+        }
+      ],
+      "issues": [],
+      "name": "Demo Plain 01",
+      "price": {
+        "amount": "34.22",
+        "currency": "USD"
+      },
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0001",
+      "schema_version": 1,
+      "source_version": "2026-01-01T00:01:00Z",
+      "supplier": "Demo Mill Co.",
+      "weight_gsm": 290.0,
+      "width_cm": 148.0
+    },
+    "platform_row": {
+      "source": "mock.materials",
+      "source_id": "mat-0001",
+      "code": "MOCK-0001",
+      "composition": [
+        {
+          "fiber": "Wool",
+          "percent": 50.0,
+          "raw": "50%WO"
+        },
+        {
+          "fiber": "Polyamide",
+          "percent": 50.0,
+          "raw": "50%PA"
+        }
+      ],
+      "composition_raw": "50%WO/50%PA",
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-001"
+        }
+      },
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "folder_paths": [],
+      "images": [
+        {
+          "height": 96,
+          "local_path": "assets/mat-0001+thumb.bin",
+          "role": "thumb",
+          "sha256": "1aaed578b1ffab755560d16bd573947e1040be557e2ef6f8b3c94437862f793a",
+          "size_bytes": 1682,
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0001.png",
+          "width": 96
+        },
+        {
+          "height": 192,
+          "local_path": "assets/mat-0001+swatch.bin",
+          "role": "swatch",
+          "sha256": "ab2eadb54eebc50db1da1a3696bf74b62545efd0529f789787cf4d0fd0d7a866",
+          "size_bytes": 6007,
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0001.jpg",
+          "width": 192
+        }
+      ],
+      "issues": [],
+      "name": "Demo Plain 01",
+      "price": {
+        "amount": "34.22",
+        "currency": "USD"
+      },
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0001",
+      "schema_version": 1,
+      "source_version": "2026-01-01T00:01:00Z",
+      "supplier": "Demo Mill Co.",
+      "weight_gsm": 290.0,
+      "width_cm": 148.0
+    }
+  },
+  "run_2": {
+    "raw_list_row": {
+      "id": "mat-0001",
+      "type": "material",
+      "code": "MOCK-0001",
+      "name": "Demo Plain 01",
+      "price": 0,
+      "currency": "USD",
+      "updated_at": "2026-01-02T00:00:00Z"
+    },
+    "raw_detail_response": {
+      "http_status": 200,
+      "body": {
+        "state": true,
+        "data": {
+          "data": {
+            "id": "mat-0001",
+            "code": "MOCK-0001",
+            "name": "Demo Plain 01",
+            "price": "34.22",
+            "currency": "USD",
+            "weight": "290 gsm",
+            "width": "148",
+            "composition": "50%WO/50%PA",
+            "supplier_id": "sup-001",
+            "supplier_name": "Demo Mill Co.",
+            "thumbs": []
+          }
+        }
+      }
+    },
+    "normalized_record": {
+      "source": "mock.materials",
+      "source_id": "mat-0001",
+      "code": "MOCK-0001",
+      "name": "Demo Plain 01",
+      "composition": [
+        {
+          "fiber": "Wool",
+          "percent": 50.0,
+          "raw": "50%WO"
+        },
+        {
+          "fiber": "Polyamide",
+          "percent": 50.0,
+          "raw": "50%PA"
+        }
+      ],
+      "composition_raw": "50%WO/50%PA",
+      "weight_gsm": 290.0,
+      "width_cm": 148.0,
+      "price": {
+        "amount": "34.22",
+        "currency": "USD"
+      },
+      "category": null,
+      "use_cases": [],
+      "tags": [],
+      "supplier": "Demo Mill Co.",
+      "folder_paths": [],
+      "images": [],
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-001"
+        }
+      },
+      "issues": [],
+      "source_version": "2026-01-02T00:00:00Z",
+      "raw_ref": "20261027T090600Z-xxxxxx:mat-0001",
+      "fetched_at": "2026-10-27T09:06:00+00:00",
+      "normalized_at": "2026-10-27T09:07:00+00:00",
+      "schema_version": 1
+    },
+    "sqlite_row": {
+      "source": "mock.materials",
+      "source_id": "mat-0001",
+      "code": "MOCK-0001",
+      "composition": [
+        {
+          "fiber": "Wool",
+          "percent": 50.0,
+          "raw": "50%WO"
+        },
+        {
+          "fiber": "Polyamide",
+          "percent": 50.0,
+          "raw": "50%PA"
+        }
+      ],
+      "composition_raw": "50%WO/50%PA",
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-001"
+        }
+      },
+      "fetched_at": "2026-10-27T09:06:00+00:00",
+      "folder_paths": [],
+      "images": [
+        {
+          "height": 96,
+          "local_path": "assets/mat-0001+thumb.bin",
+          "role": "thumb",
+          "sha256": "1aaed578b1ffab755560d16bd573947e1040be557e2ef6f8b3c94437862f793a",
+          "size_bytes": 1682,
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0001.png",
+          "width": 96
+        },
+        {
+          "height": 192,
+          "local_path": "assets/mat-0001+swatch.bin",
+          "role": "swatch",
+          "sha256": "ab2eadb54eebc50db1da1a3696bf74b62545efd0529f789787cf4d0fd0d7a866",
+          "size_bytes": 6007,
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0001.jpg",
+          "width": 192
+        }
+      ],
+      "issues": [],
+      "name": "Demo Plain 01",
+      "price": {
+        "amount": "34.22",
+        "currency": "USD"
+      },
+      "raw_ref": "20261027T090600Z-xxxxxx:mat-0001",
+      "schema_version": 1,
+      "source_version": "2026-01-02T00:00:00Z",
+      "supplier": "Demo Mill Co.",
+      "weight_gsm": 290.0,
+      "width_cm": 148.0,
+      "ops_note": "checked by hand, keep"
+    },
+    "platform_row": {
+      "source": "mock.materials",
+      "source_id": "mat-0001",
+      "code": "MOCK-0001",
+      "composition": [
+        {
+          "fiber": "Wool",
+          "percent": 50.0,
+          "raw": "50%WO"
+        },
+        {
+          "fiber": "Polyamide",
+          "percent": 50.0,
+          "raw": "50%PA"
+        }
+      ],
+      "composition_raw": "50%WO/50%PA",
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-001"
+        }
+      },
+      "fetched_at": "2026-10-27T09:06:00+00:00",
+      "folder_paths": [],
+      "images": [
+        {
+          "height": 96,
+          "local_path": "assets/mat-0001+thumb.bin",
+          "role": "thumb",
+          "sha256": "1aaed578b1ffab755560d16bd573947e1040be557e2ef6f8b3c94437862f793a",
+          "size_bytes": 1682,
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0001.png",
+          "width": 96
+        },
+        {
+          "height": 192,
+          "local_path": "assets/mat-0001+swatch.bin",
+          "role": "swatch",
+          "sha256": "ab2eadb54eebc50db1da1a3696bf74b62545efd0529f789787cf4d0fd0d7a866",
+          "size_bytes": 6007,
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0001.jpg",
+          "width": 192
+        }
+      ],
+      "issues": [],
+      "name": "Demo Plain 01",
+      "price": {
+        "amount": "34.22",
+        "currency": "USD"
+      },
+      "raw_ref": "20261027T090600Z-xxxxxx:mat-0001",
+      "schema_version": 1,
+      "source_version": "2026-01-02T00:00:00Z",
+      "supplier": "Demo Mill Co.",
+      "weight_gsm": 290.0,
+      "width_cm": 148.0,
+      "ops_note": "checked by hand, keep"
+    }
+  }
+}

@@ -1,0 +1,484 @@
+[
+  {
+    "source": "mock.materials",
+    "source_id": "mat-0001",
+    "code": "MOCK-0001",
+    "composition": [
+      {
+        "fiber": "Wool",
+        "percent": 50.0,
+        "raw": "50%WO"
+      },
+      {
+        "fiber": "Polyamide",
+        "percent": 50.0,
+        "raw": "50%PA"
+      }
+    ],
+    "composition_raw": "50%WO/50%PA",
+    "extra": {
+      "mock": {
+        "supplier_id": "sup-001"
+      }
+    },
+    "fetched_at": "2026-10-27T09:06:00+00:00",
+    "folder_paths": [],
+    "images": [
+      {
+        "height": 96,
+        "local_path": "assets/mat-0001+thumb.bin",
+        "role": "thumb",
+        "sha256": "1aaed578b1ffab755560d16bd573947e1040be557e2ef6f8b3c94437862f793a",
+        "size_bytes": 1682,
+        "source_url": "http://127.0.0.1:8765/media/thumb/mat-0001.png",
+        "width": 96
+      },
+      {
+        "height": 192,
+        "local_path": "assets/mat-0001+swatch.bin",
+        "role": "swatch",
+        "sha256": "ab2eadb54eebc50db1da1a3696bf74b62545efd0529f789787cf4d0fd0d7a866",
+        "size_bytes": 6007,
+        "source_url": "http://127.0.0.1:8765/media/swatch/mat-0001.jpg",
+        "width": 192
+      }
+    ],
+    "issues": [],
+    "name": "Demo Plain 01",
+    "price": {
+      "amount": "34.22",
+      "currency": "USD"
+    },
+    "raw_ref": "20261027T090600Z-xxxxxx:mat-0001",
+    "schema_version": 1,
+    "source_version": "2026-01-02T00:00:00Z",
+    "supplier": "Demo Mill Co.",
+    "weight_gsm": 290.0,
+    "width_cm": 148.0,
+    "ops_note": "checked by hand, keep"
+  },
+  {
+    "source": "mock.materials",
+    "source_id": "mat-0002",
+    "code": "MOCK-0002",
+    "composition": [
+      {
+        "fiber": "Elastane",
+        "percent": 70.0,
+        "raw": "70%EA"
+      },
+      {
+        "fiber": "Polyester",
+        "percent": 30.0,
+        "raw": "30%PES"
+      }
+    ],
+    "composition_raw": "70%EA/30%PES",
+    "extra": {
+      "mock": {
+        "supplier_id": "sup-002"
+      }
+    },
+    "fetched_at": "2026-10-27T09:01:00+00:00",
+    "folder_paths": [
+      "Demo Woven"
+    ],
+    "images": [
+      {
+        "height": 96,
+        "local_path": "assets/mat-0002+thumb.bin",
+        "role": "thumb",
+        "sha256": "21d8b1b748f41a4966fe0cc5c1e4d76ca1bc1706767f93239f30993d8e2e8bcb",
+        "size_bytes": 1989,
+        "source_url": "http://127.0.0.1:8765/media/thumb/mat-0002.png",
+        "width": 96
+      },
+      {
+        "height": 192,
+        "local_path": "assets/mat-0002+swatch.bin",
+        "role": "swatch",
+        "sha256": "2e34afe9ec695658b4d7b635ba884d6a7ad67cb3b968f80e94cb0bced84b883d",
+        "size_bytes": 11097,
+        "source_url": "http://127.0.0.1:8765/media/swatch/mat-0002.jpg",
+        "width": 192
+      }
+    ],
+    "issues": [],
+    "name": "Demo Woven 02",
+    "price": {
+      "amount": "38.87",
+      "currency": "USD"
+    },
+    "raw_ref": "20261027T090100Z-xxxxxx:mat-0002",
+    "schema_version": 1,
+    "source_version": "2026-01-01T00:02:00Z",
+    "supplier": "Sample Textiles Ltd.",
+    "weight_gsm": 250.0,
+    "width_cm": null,
+    "ops_note": null
+  },
+  {
+    "source": "mock.materials",
+    "source_id": "mat-0008",
+    "code": "MOCK-0008",
+    "composition": [
+      {
+        "fiber": "Viscose",
+        "percent": 95.0,
+        "raw": "95%VI"
+      },
+      {
+        "fiber": "Polyester",
+        "percent": 5.0,
+        "raw": "5%PES"
+      }
+    ],
+    "composition_raw": "95%VI/5%PES",
+    "extra": {
+      "mock": {
+        "supplier_id": "sup-001"
+      }
+    },
+    "fetched_at": "2026-10-27T09:01:00+00:00",
+    "folder_paths": [
+      "Demo Woven"
+    ],
+    "images": [
+      {
+        "height": 96,
+        "local_path": "assets/mat-0008+thumb.bin",
+        "role": "thumb",
+        "sha256": "fc3ef0c136a9b90f0a238aa33897d3e5b59664b70fdf42928116c7d02fac132e",
+        "size_bytes": 2070,
+        "source_url": "http://127.0.0.1:8765/media/thumb/mat-0008.png",
+        "width": 96
+      },
+      {
+        "height": 192,
+        "local_path": "assets/mat-0008+swatch.bin",
+        "role": "swatch",
+        "sha256": "457ae00357626ee0c68b58d070ab7868f9309739ac7378618bee6141c3dcbb72",
+        "size_bytes": 11098,
+        "source_url": "http://127.0.0.1:8765/media/swatch/mat-0008.jpg",
+        "width": 192
+      }
+    ],
+    "issues": [
+      "weight_gsm:source_zero"
+    ],
+    "name": "Demo Woven 08",
+    "price": {
+      "amount": "38.95",
+      "currency": "USD"
+    },
+    "raw_ref": "20261027T090100Z-xxxxxx:mat-0008",
+    "schema_version": 1,
+    "source_version": "2026-01-01T00:08:00Z",
+    "supplier": "Demo Mill Co.",
+    "weight_gsm": null,
+    "width_cm": 150.0,
+    "ops_note": null
+  },
+  {
+    "source": "mock.materials",
+    "source_id": "mat-0005",
+    "code": "MOCK-0005",
+    "composition": [
+      {
+        "fiber": "Linen",
+        "percent": 95.0,
+        "raw": "95%LI"
+      },
+      {
+        "fiber": "Viscose",
+        "percent": 5.0,
+        "raw": "5%VI"
+      }
+    ],
+    "composition_raw": "95%LI/5%VI",
+    "extra": {
+      "mock": {
+        "supplier_id": "sup-004"
+      }
+    },
+    "fetched_at": "2026-10-27T09:01:00+00:00",
+    "folder_paths": [
+      "Demo Knit"
+    ],
+    "images": [
+      {
+        "height": 96,
+        "local_path": "assets/mat-0005+thumb.bin",
+        "role": "thumb",
+        "sha256": "1216d5fc94e9c72e926ba215a3fa4e05e1530b6e487b4caac5bfa05873d3c33d",
+        "size_bytes": 3008,
+        "source_url": "http://127.0.0.1:8765/media/thumb/mat-0005.png",
+        "width": 96
+      },
+      {
+        "height": 192,
+        "local_path": "assets/mat-0005+swatch.bin",
+        "role": "swatch",
+        "sha256": "adfeac23448c3b7928fd49717ca9b8f43b12b546071120537d422da307a3b642",
+        "size_bytes": 11355,
+        "source_url": "http://127.0.0.1:8765/media/swatch/mat-0005.jpg",
+        "width": 192
+      }
+    ],
+    "issues": [
+      "width_cm:unparseable"
+    ],
+    "name": "Demo Knit 05",
+    "price": {
+      "amount": "44.59",
+      "currency": "USD"
+    },
+    "raw_ref": "20261027T090100Z-xxxxxx:mat-0005",
+    "schema_version": 1,
+    "source_version": "2026-01-01T00:05:00Z",
+    "supplier": "Example Knits Inc.",
+    "weight_gsm": 370.0,
+    "width_cm": null,
+    "ops_note": null
+  },
+  {
+    "source": "mock.materials",
+    "source_id": "mat-0003",
+    "code": "MOCK-0003",
+    "composition": [
+      {
+        "fiber": "Cotton",
+        "percent": 95.0,
+        "raw": "95%CO"
+      },
+      {
+        "fiber": "Wool",
+        "percent": 5.0,
+        "raw": "5%WO"
+      }
+    ],
+    "composition_raw": "95%CO/5%WO",
+    "extra": {
+      "mock": {
+        "supplier_id": "sup-002"
+      }
+    },
+    "fetched_at": "2026-10-27T09:01:00+00:00",
+    "folder_paths": [
+      "Demo Woven/Twills"
+    ],
+    "images": [
+      {
+        "height": 96,
+        "local_path": "assets/mat-0003+thumb.bin",
+        "role": "thumb",
+        "sha256": "4201716ebd946bac6329b74990d0f2aa4974eb1cce9e02aca8a66e18813501c0",
+        "size_bytes": 3342,
+        "source_url": "http://127.0.0.1:8765/media/thumb/mat-0003.png",
+        "width": 96
+      },
+      {
+        "height": 192,
+        "local_path": "assets/mat-0003+swatch.bin",
+        "role": "swatch",
+        "sha256": "e280e35afd81068b93c57d32f299593df4c6033b8eda6a0abda4d26192d0b1f8",
+        "size_bytes": 11942,
+        "source_url": "http://127.0.0.1:8765/media/swatch/mat-0003.jpg",
+        "width": 192
+      }
+    ],
+    "issues": [],
+    "name": "Demo Twill 03",
+    "price": {
+      "amount": "40.65",
+      "currency": "USD"
+    },
+    "raw_ref": "20261027T090100Z-xxxxxx:mat-0003",
+    "schema_version": 1,
+    "source_version": "2026-01-01T00:03:00Z",
+    "supplier": "Sample Textiles Ltd.",
+    "weight_gsm": 160.0,
+    "width_cm": null,
+    "ops_note": null
+  },
+  {
+    "source": "mock.materials",
+    "source_id": "mat-0004",
+    "code": "MOCK-0004",
+    "composition": [
+      {
+        "fiber": "Cotton",
+        "percent": 70.0,
+        "raw": "70%CO"
+      },
+      {
+        "fiber": "Polyamide",
+        "percent": 30.0,
+        "raw": "30%PA"
+      }
+    ],
+    "composition_raw": "70%CO/30%PA",
+    "extra": {
+      "mock": {
+        "supplier_id": "sup-001"
+      }
+    },
+    "fetched_at": "2026-10-27T09:01:00+00:00",
+    "folder_paths": [
+      "Demo Woven/Denim"
+    ],
+    "images": [
+      {
+        "height": 96,
+        "local_path": "assets/mat-0004+thumb.bin",
+        "role": "thumb",
+        "sha256": "3de09835b54091917f2ee6071270f82f02a5a4aeb0af363c1de5908c9343e084",
+        "size_bytes": 3009,
+        "source_url": "http://127.0.0.1:8765/media/thumb/mat-0004.png",
+        "width": 96
+      },
+      {
+        "height": 192,
+        "local_path": "assets/mat-0004+swatch.bin",
+        "role": "swatch",
+        "sha256": "d4025111639f9757e574b56420dc1cbc525d84ed1187e11d57f5f6e413f9fe36",
+        "size_bytes": 11243,
+        "source_url": "http://127.0.0.1:8765/media/swatch/mat-0004.jpg",
+        "width": 192
+      }
+    ],
+    "issues": [],
+    "name": "Demo Denim 04",
+    "price": {
+      "amount": "18.22",
+      "currency": "USD"
+    },
+    "raw_ref": "20261027T090100Z-xxxxxx:mat-0004",
+    "schema_version": 1,
+    "source_version": "2026-01-01T00:04:00Z",
+    "supplier": "Demo Mill Co.",
+    "weight_gsm": 380.0,
+    "width_cm": null,
+    "ops_note": null
+  },
+  {
+    "source": "mock.materials",
+    "source_id": "mat-0006",
+    "code": "MOCK-0006",
+    "composition": [
+      {
+        "fiber": "Elastane",
+        "percent": 80.0,
+        "raw": "80%EA"
+      },
+      {
+        "fiber": null,
+        "percent": 20.0,
+        "raw": "20%ZZ"
+      }
+    ],
+    "composition_raw": "80%EA/20%ZZ",
+    "extra": {
+      "mock": {
+        "supplier_id": "sup-004"
+      }
+    },
+    "fetched_at": "2026-10-27T09:01:00+00:00",
+    "folder_paths": [
+      "Demo Knit/Jersey"
+    ],
+    "images": [
+      {
+        "height": 96,
+        "local_path": "assets/mat-0006+thumb.bin",
+        "role": "thumb",
+        "sha256": "00f8f8adcd10d4c1da80e40c7420db92cd4c106addef0192057eb458700cdc39",
+        "size_bytes": 3229,
+        "source_url": "http://127.0.0.1:8765/media/thumb/mat-0006.png",
+        "width": 96
+      },
+      {
+        "height": 192,
+        "local_path": "assets/mat-0006+swatch.bin",
+        "role": "swatch",
+        "sha256": "16d5d60aa870b65cc5d2c04934f2d947b90cf289ae2aa10ba4b96824608882d0",
+        "size_bytes": 10601,
+        "source_url": "http://127.0.0.1:8765/media/swatch/mat-0006.jpg",
+        "width": 192
+      }
+    ],
+    "issues": [
+      "composition:unknown_code:ZZ"
+    ],
+    "name": "Demo Knit 06",
+    "price": {
+      "amount": "44.39",
+      "currency": "USD"
+    },
+    "raw_ref": "20261027T090100Z-xxxxxx:mat-0006",
+    "schema_version": 1,
+    "source_version": "2026-01-01T00:06:00Z",
+    "supplier": "Example Knits Inc.",
+    "weight_gsm": 370.0,
+    "width_cm": 146.1,
+    "ops_note": null
+  },
+  {
+    "source": "mock.materials",
+    "source_id": "mat-0007",
+    "code": "MOCK-0007",
+    "composition": [
+      {
+        "fiber": "Linen",
+        "percent": 70.0,
+        "raw": "70%LI"
+      },
+      {
+        "fiber": "Elastane",
+        "percent": 30.0,
+        "raw": "30%EA"
+      }
+    ],
+    "composition_raw": "70%LI/30%EA",
+    "extra": {
+      "mock": {
+        "supplier_id": "sup-004"
+      }
+    },
+    "fetched_at": "2026-10-27T09:06:00+00:00",
+    "folder_paths": [],
+    "images": [
+      {
+        "height": 96,
+        "local_path": "assets/mat-0007+thumb.bin",
+        "role": "thumb",
+        "sha256": "49487de75ee3cd3f416593140b7d15550da2357a3b0201128903397b635ab3aa",
+        "size_bytes": 3009,
+        "source_url": "http://127.0.0.1:8765/media/thumb/mat-0007.png",
+        "width": 96
+      },
+      {
+        "height": 192,
+        "local_path": "assets/mat-0007+swatch.bin",
+        "role": "swatch",
+        "sha256": "f0d86105983742a453efe19348a4ff2e45a4feb58a43923b4bd78a3d61fe1101",
+        "size_bytes": 5985,
+        "source_url": "http://127.0.0.1:8765/media/swatch/mat-0007.jpg",
+        "width": 192
+      }
+    ],
+    "issues": [],
+    "name": "Demo Plain 07",
+    "price": {
+      "amount": "36.94",
+      "currency": "USD"
+    },
+    "raw_ref": "20261027T090600Z-xxxxxx:mat-0007",
+    "schema_version": 1,
+    "source_version": "2026-01-01T00:07:00Z",
+    "supplier": "Example Knits Inc.",
+    "weight_gsm": 160.0,
+    "width_cm": 148.0,
+    "ops_note": null
+  }
+]

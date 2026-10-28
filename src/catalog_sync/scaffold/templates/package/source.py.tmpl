@@ -1,0 +1,128 @@
+"""The {{title}} items as a Source: the list, each detail record, the pictures.
+
+What is stored per item stays raw and separate: the listing row as the service returned it, and
+the detail record. The mapping (mappings/{{entity}}.yaml) reads them side by side.
+
+Pictures are fetched without the credential (a storage host must never see the token) and fitted
+into the byte budget of the ``images`` option.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Iterator, Mapping
+from pathlib import Path
+
+from catalog_sync.errors import SourceShapeError
+from catalog_sync.http import HttpSeams
+from catalog_sync.models import JsonObject
+{{source_imports}}
+from catalog_sync.sources.base import AssetRef, InspectReport, ListedItem
+from catalog_sync.state import Checkpoint
+
+from {{package}}.api import (
+    {{class_prefix}}Api,
+    api_headers,
+)
+from {{package}}.settings import {{class_prefix}}Settings
+
+FRONTIER_KEY = "{{name}}.items.position"
+# TODO(connector): the field that identifies an item in the listing row, and a change marker (an
+# update timestamp or version) that the puller compares to skip items that did not change. With no
+# marker the puller hashes the whole row, which works but notices every cosmetic change.
+ID_FIELD = "id"
+VERSION_FIELD = "updated_at"
+# TODO(connector): where each picture role comes from: "list." or "detail." plus a path; the first
+# expression that yields a URL wins. Delete the roles if the service has no pictures.
+_PICTURES: Mapping[str, tuple[str, ...]] = {"thumb": ("list.image_url",)}
+
+
+class {{class_prefix}}ItemsSource:
+    name = "{{source_name}}"
+
+    def __init__(
+        self,
+        settings: {{class_prefix}}Settings,
+        *,
+        seams: HttpSeams | None = None,
+    ) -> None:
+        self._settings = settings
+        self._connection = Connection(
+            credential=settings.credential,
+            api_headers=api_headers,
+            asset_headers={"user-agent": USER_AGENT, "accept": "image/*"},
+            gap_s=settings.request_gap_s,
+            max_requests_per_minute=settings.max_requests_per_minute,
+            seams=seams,
+        )
+        # TODO(connector): https_only() lets pictures come from any https host (a CDN); use
+        # same_host(settings.base_url) to allow only the API's own host.
+        self._pictures = PictureAssets(
+            self._connection, roles=_PICTURES, url_rule=https_only(), policy=settings.images
+        )
+        self._api_client: {{class_prefix}}Api | None = None
+
+    @classmethod
+    def from_options(
+        cls,
+        options: Mapping[str, object],
+        *,
+        base_dir: Path,
+    ) -> {{class_prefix}}ItemsSource:
+        del base_dir  # no option of this source is a path
+        return cls({{class_prefix}}Settings.from_options(options))
+
+    # --- Source -----------------------------------------------------------------------------
+
+    def enumerate(self, state: Checkpoint) -> Iterator[ListedItem]:
+{{source_pages}}
+        for page in pages:
+            for row in page.rows:
+                yield _listed_item(row)
+
+    def fetch_detail(self, item: ListedItem) -> JsonObject:
+        with item_scoped(item.source_id, "detail request"):
+            return self._api().item_detail(item.source_id)
+
+    def asset_refs(self, item: ListedItem, detail: JsonObject | None) -> list[AssetRef]:
+        return self._pictures.refs(item, detail)
+
+    def fetch_asset(self, ref: AssetRef) -> bytes:
+        return self._pictures.fetch(ref)
+
+    # --- Inspectable ------------------------------------------------------------------------
+
+    def inspect(self, folder: str | None) -> InspectReport:
+        """Read the first page and the first item's detail record; store nothing."""
+        if folder is not None:
+            raise SourceShapeError("this source is a flat list; there are no folders to look into")
+        api = self._api()
+        page = api.first_page()
+        notes = [f"the first page has {len(page.rows)} item(s)"]
+        if page.rows:
+            notes.append(f"listing row fields: {', '.join(sorted(page.rows[0]))}")
+            detail = api.item_detail(_item_id(page.rows[0]))
+            notes.append(f"detail record fields: {', '.join(sorted(detail))}")
+        return InspectReport(total={{source_total}}, folders=(), notes=tuple(notes))
+
+    # --- plumbing ---------------------------------------------------------------------------
+
+    def _api(self) -> {{class_prefix}}Api:
+        if self._api_client is None:
+            self._api_client = {{class_prefix}}Api(
+                self._connection.api(),
+                base_url=self._settings.base_url,
+                page_size=self._settings.page_size,
+            )
+        return self._api_client
+
+
+def _item_id(row: Mapping[str, object]) -> str:
+    value = row.get(ID_FIELD)
+    if isinstance(value, bool) or not isinstance(value, (int, str)) or value == "":
+        raise SourceShapeError(f"a listing row has no usable {ID_FIELD!r}")
+    return str(value)
+
+
+def _listed_item(row: JsonObject) -> ListedItem:
+    version = row.get(VERSION_FIELD)
+    return ListedItem(_item_id(row), version if isinstance(version, str) else None, row, {})

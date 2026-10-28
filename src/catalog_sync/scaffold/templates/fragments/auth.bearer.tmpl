@@ -1,0 +1,17 @@
+#@ fake_constants
+AUTH_HEADER = "authorization"
+AUTH_VALUE = "Bearer fake-token-0001"
+
+#@ fake_login
+#@ fake_login_method
+#@ toml_credential
+renew_before_days = 2               # how soon before a token's expiry `auth status` says "renew soon"
+# base_url = "https://{{host}}"     # only if the web app lives somewhere else than the API
+
+#@ readme_auth
+A bearer token, the one the service's own web app sends in its `Authorization` header. Get it into
+the credential store with `catalog-sync login {{name}} --paste-curl -` (copy any authenticated API
+call from the browser's network tab with "Copy as cURL (bash)", paste, Ctrl-D) or, once the
+selectors in `credentials.py` match the real login page, `catalog-sync login {{name}} --browser`
+(`--headed` when the service wants a person: a captcha, a code). The token's expiry is read from it
+when it is a JWT; `catalog-sync auth status {{name}}` says how long it has.

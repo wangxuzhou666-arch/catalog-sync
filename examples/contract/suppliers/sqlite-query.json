@@ -1,0 +1,45 @@
+{
+  "sql": "SELECT source_id, name, rating, lead_time_days, listed_at, issues FROM suppliers ORDER BY source_id",
+  "columns": [
+    "source_id",
+    "name",
+    "rating",
+    "lead_time_days",
+    "listed_at",
+    "issues"
+  ],
+  "rows": [
+    [
+      "sup-001",
+      "Demo Mill Co.",
+      3.2,
+      53,
+      "2026-01-01T00:00:00+00:00",
+      "[]"
+    ],
+    [
+      "sup-002",
+      "Sample Textiles Ltd.",
+      3.2,
+      6,
+      "2026-01-02T00:00:00+00:00",
+      "[]"
+    ],
+    [
+      "sup-003",
+      "Placeholder Weavers",
+      null,
+      56,
+      "2026-01-03T00:00:00+00:00",
+      "[]"
+    ],
+    [
+      "sup-004",
+      "Example Knits Inc.",
+      3.1,
+      6,
+      null,
+      "[\"listed_at:unparseable\"]"
+    ]
+  ]
+}

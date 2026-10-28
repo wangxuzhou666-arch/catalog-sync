@@ -1,0 +1,95 @@
+{
+  "sql": "SELECT source_id, code, weight_gsm, width_cm, price, supplier, issues, raw_ref FROM materials ORDER BY source_id",
+  "columns": [
+    "source_id",
+    "code",
+    "weight_gsm",
+    "width_cm",
+    "price",
+    "supplier",
+    "issues",
+    "raw_ref"
+  ],
+  "rows": [
+    [
+      "mat-0001",
+      "MOCK-0001",
+      290.0,
+      148.0,
+      "{\"amount\":\"34.22\",\"currency\":\"USD\"}",
+      "Demo Mill Co.",
+      "[]",
+      "20261027T090600Z-xxxxxx:mat-0001"
+    ],
+    [
+      "mat-0002",
+      "MOCK-0002",
+      250.0,
+      null,
+      "{\"amount\":\"38.87\",\"currency\":\"USD\"}",
+      "Sample Textiles Ltd.",
+      "[]",
+      "20261027T090100Z-xxxxxx:mat-0002"
+    ],
+    [
+      "mat-0003",
+      "MOCK-0003",
+      160.0,
+      null,
+      "{\"amount\":\"40.65\",\"currency\":\"USD\"}",
+      "Sample Textiles Ltd.",
+      "[]",
+      "20261027T090100Z-xxxxxx:mat-0003"
+    ],
+    [
+      "mat-0004",
+      "MOCK-0004",
+      380.0,
+      null,
+      "{\"amount\":\"18.22\",\"currency\":\"USD\"}",
+      "Demo Mill Co.",
+      "[]",
+      "20261027T090100Z-xxxxxx:mat-0004"
+    ],
+    [
+      "mat-0005",
+      "MOCK-0005",
+      370.0,
+      null,
+      "{\"amount\":\"44.59\",\"currency\":\"USD\"}",
+      "Example Knits Inc.",
+      "[\"width_cm:unparseable\"]",
+      "20261027T090100Z-xxxxxx:mat-0005"
+    ],
+    [
+      "mat-0006",
+      "MOCK-0006",
+      370.0,
+      146.1,
+      "{\"amount\":\"44.39\",\"currency\":\"USD\"}",
+      "Example Knits Inc.",
+      "[\"composition:unknown_code:ZZ\"]",
+      "20261027T090100Z-xxxxxx:mat-0006"
+    ],
+    [
+      "mat-0007",
+      "MOCK-0007",
+      160.0,
+      148.0,
+      "{\"amount\":\"36.94\",\"currency\":\"USD\"}",
+      "Example Knits Inc.",
+      "[]",
+      "20261027T090600Z-xxxxxx:mat-0007"
+    ],
+    [
+      "mat-0008",
+      "MOCK-0008",
+      null,
+      150.0,
+      "{\"amount\":\"38.95\",\"currency\":\"USD\"}",
+      "Demo Mill Co.",
+      "[\"weight_gsm:source_zero\"]",
+      "20261027T090100Z-xxxxxx:mat-0008"
+    ]
+  ]
+}

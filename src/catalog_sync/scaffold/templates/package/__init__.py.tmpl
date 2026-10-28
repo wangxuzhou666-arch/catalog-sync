@@ -1,0 +1,37 @@
+"""catalog-sync connector for {{title}}.
+
+It registers the ``{{source_name}}`` source,
+the ``{{name}}`` credential and the ``{{entity}}`` schema
+(see pyproject.toml).
+"""
+
+from pathlib import Path
+
+from catalog_sync.sdk import ConnectorInfo
+
+from {{package}}.settings import SETTINGS
+
+_HERE = Path(__file__).parent
+
+
+def item_schema() -> Path:
+    """Where the ``{{entity}}`` entity schema is declared.
+
+    Registered as the schema ``{{entity}}`` (catalog_sync.schemas).
+    """
+    return _HERE / "schemas" / "{{entity}}.yaml"
+
+
+def item_connector() -> ConnectorInfo:
+    """What ``catalog-sync init`` needs to set the source up.
+
+    Registered as the connector info of ``{{source_name}}`` (catalog_sync.connectors).
+    """
+    return ConnectorInfo(
+        # TODO(connector): one line saying what this connector reads, for the list `init` shows.
+        summary="{{title}} items, read through your own login",
+        credential="{{name}}",
+        settings=SETTINGS,
+        mapping=_HERE / "mappings" / "{{entity}}.yaml",
+        credential_settings=("base_url",),
+    )

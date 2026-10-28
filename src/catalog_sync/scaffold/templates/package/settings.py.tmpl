@@ -1,0 +1,88 @@
+"""The ``[sources.NAME]`` options of the {{title}} source, declared and validated.
+
+Each option is declared once, as a ``SettingSpec``: its key, type, default and a line of help.
+``catalog-sync init`` asks about the declared ones, and the reader below validates against the same
+declarations, so the list and the code cannot disagree. Values arrive from TOML (typed) or from
+``--option KEY=VALUE`` (always strings), so scalars are accepted in both forms. Anything unknown
+is an error: a typo in an option name must not silently fall back to a default.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Mapping
+from dataclasses import dataclass, field
+
+from catalog_sync.credentials.base import CredentialHandle
+from catalog_sync.images import ImagePolicy
+from catalog_sync.sdk import (
+    MAX_REQUESTS_PER_MINUTE,
+    OptionReader,
+    SettingKind,
+    SettingSpec,
+    declared_keys,
+    request_gap_setting,
+)
+
+LABEL = "{{source_name}}"
+# TODO(connector): the address of the service's web app or API, without a path.
+DEFAULT_BASE_URL = "https://{{host}}"
+DEFAULT_PAGE_SIZE = 50
+MAX_PAGE_SIZE = 200  # TODO(connector): the most the service lets one page hold
+
+BASE_URL = SettingSpec(
+    "base_url",
+    SettingKind.URL,
+    "The address of the service's web app or API.",
+    default=DEFAULT_BASE_URL,
+    essential=True,
+)
+PAGE_SIZE = SettingSpec(
+    "page_size",
+    SettingKind.INTEGER,
+    "Rows per request.",
+    default=DEFAULT_PAGE_SIZE,
+    minimum=1,
+    maximum=MAX_PAGE_SIZE,
+)
+MAX_PAGES = SettingSpec(
+    "max_pages",
+    SettingKind.INTEGER,
+    "Most pages of one listing a single run fetches before it stops with a fuse (exit code 3); a "
+    "resumed run counts again from zero.",
+    default=1000,
+    minimum=1,
+)
+REQUEST_GAP = request_gap_setting(0.5)
+IMAGES = SettingSpec(
+    "images",
+    SettingKind.TABLE,
+    "Picture size limits: max_edge, edge_fallbacks, qualities, max_bytes.",
+)
+SETTINGS = (BASE_URL, PAGE_SIZE, MAX_PAGES, REQUEST_GAP, MAX_REQUESTS_PER_MINUTE, IMAGES)
+
+
+@dataclass(frozen=True)
+class {{class_prefix}}Settings:
+    credential: CredentialHandle
+    base_url: str = DEFAULT_BASE_URL
+    page_size: int = DEFAULT_PAGE_SIZE
+    max_pages: int = 1000
+    request_gap_s: float = 0.5
+    # The compliance ceiling the CLI hands every networked source; see RateLimiter in http.py.
+    max_requests_per_minute: int | None = None
+    images: ImagePolicy = field(default_factory=ImagePolicy)
+
+    @classmethod
+    def from_options(cls, options: Mapping[str, object]) -> {{class_prefix}}Settings:
+        reader = OptionReader(options, label=LABEL)
+        reader.reject_unknown(declared_keys(SETTINGS))
+        request_gap_s, ceiling = reader.pacing(REQUEST_GAP)
+        return cls(
+            credential=reader.credential(),
+            base_url=reader.url_of(BASE_URL),
+            page_size=reader.integer_of(PAGE_SIZE),
+            max_pages=reader.integer_of(MAX_PAGES),
+            request_gap_s=request_gap_s,
+            max_requests_per_minute=ceiling,
+            images=ImagePolicy.from_options(reader.table(IMAGES.key)),
+        )

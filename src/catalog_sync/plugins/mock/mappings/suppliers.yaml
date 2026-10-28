@@ -1,0 +1,34 @@
+# Mapping for the Mock SaaS's suppliers, onto the `supplier` schema (schemas/supplier.yaml).
+#
+# There is no detail record for a supplier: the listing row holds all of it.
+version: 1
+source: mock.suppliers
+schema: supplier
+
+fields:
+  name:
+    from: [list.name]
+
+  country:
+    from: [list.country]
+
+  rating:
+    from: [list.rating]
+
+  lead_time_days:
+    from: [list.lead_time_days]
+
+  certifications:
+    from: [list.certifications]
+
+  # `sensitive: true` makes a sink drop the field unless it is configured with
+  # sensitive_fields = "hash" or "keep".
+  contact_email:
+    from: [list.contact_email]
+    sensitive: true
+
+  address:
+    from: [list.address]
+
+  listed_at:
+    from: [list.listed_at]

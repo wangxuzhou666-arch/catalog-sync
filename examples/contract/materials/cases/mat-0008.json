@@ -1,0 +1,352 @@
+{
+  "run_1": {
+    "raw_list_row": {
+      "id": "mat-0008",
+      "type": "material",
+      "code": "MOCK-0008",
+      "name": "Demo Woven 08",
+      "price": 0,
+      "currency": "USD",
+      "thumbnail_url": "http://127.0.0.1:8765/media/thumb/mat-0008.png",
+      "updated_at": "2026-01-01T00:08:00Z"
+    },
+    "raw_detail_response": {
+      "http_status": 200,
+      "body": {
+        "state": true,
+        "data": {
+          "data": {
+            "id": "mat-0008",
+            "code": "MOCK-0008",
+            "name": "Demo Woven 08",
+            "price": "38.95",
+            "currency": "USD",
+            "weight": "0 gsm",
+            "width": "150cm",
+            "composition": "95%VI/5%PES",
+            "supplier_id": "sup-001",
+            "supplier_name": "Demo Mill Co.",
+            "thumbs": [],
+            "swatch_url": "http://127.0.0.1:8765/media/swatch/mat-0008.jpg"
+          }
+        }
+      }
+    },
+    "normalized_record": {
+      "source": "mock.materials",
+      "source_id": "mat-0008",
+      "code": "MOCK-0008",
+      "name": "Demo Woven 08",
+      "composition": [
+        {
+          "fiber": "Viscose",
+          "percent": 95.0,
+          "raw": "95%VI"
+        },
+        {
+          "fiber": "Polyester",
+          "percent": 5.0,
+          "raw": "5%PES"
+        }
+      ],
+      "composition_raw": "95%VI/5%PES",
+      "weight_gsm": null,
+      "width_cm": 150.0,
+      "price": {
+        "amount": "38.95",
+        "currency": "USD"
+      },
+      "category": null,
+      "use_cases": [],
+      "tags": [],
+      "supplier": "Demo Mill Co.",
+      "folder_paths": [
+        "Demo Woven"
+      ],
+      "images": [
+        {
+          "role": "thumb",
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0008.png",
+          "local_path": "assets/mat-0008+thumb.bin",
+          "sha256": "fc3ef0c136a9b90f0a238aa33897d3e5b59664b70fdf42928116c7d02fac132e",
+          "width": 96,
+          "height": 96,
+          "size_bytes": 2070
+        },
+        {
+          "role": "swatch",
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0008.jpg",
+          "local_path": "assets/mat-0008+swatch.bin",
+          "sha256": "457ae00357626ee0c68b58d070ab7868f9309739ac7378618bee6141c3dcbb72",
+          "width": 192,
+          "height": 192,
+          "size_bytes": 11098
+        }
+      ],
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-001"
+        }
+      },
+      "issues": [
+        "weight_gsm:source_zero"
+      ],
+      "source_version": "2026-01-01T00:08:00Z",
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0008",
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "normalized_at": "2026-10-27T09:02:00+00:00",
+      "schema_version": 1
+    },
+    "sqlite_row": {
+      "source": "mock.materials",
+      "source_id": "mat-0008",
+      "code": "MOCK-0008",
+      "composition": [
+        {
+          "fiber": "Viscose",
+          "percent": 95.0,
+          "raw": "95%VI"
+        },
+        {
+          "fiber": "Polyester",
+          "percent": 5.0,
+          "raw": "5%PES"
+        }
+      ],
+      "composition_raw": "95%VI/5%PES",
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-001"
+        }
+      },
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "folder_paths": [
+        "Demo Woven"
+      ],
+      "images": [
+        {
+          "height": 96,
+          "local_path": "assets/mat-0008+thumb.bin",
+          "role": "thumb",
+          "sha256": "fc3ef0c136a9b90f0a238aa33897d3e5b59664b70fdf42928116c7d02fac132e",
+          "size_bytes": 2070,
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0008.png",
+          "width": 96
+        },
+        {
+          "height": 192,
+          "local_path": "assets/mat-0008+swatch.bin",
+          "role": "swatch",
+          "sha256": "457ae00357626ee0c68b58d070ab7868f9309739ac7378618bee6141c3dcbb72",
+          "size_bytes": 11098,
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0008.jpg",
+          "width": 192
+        }
+      ],
+      "issues": [
+        "weight_gsm:source_zero"
+      ],
+      "name": "Demo Woven 08",
+      "price": {
+        "amount": "38.95",
+        "currency": "USD"
+      },
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0008",
+      "schema_version": 1,
+      "source_version": "2026-01-01T00:08:00Z",
+      "supplier": "Demo Mill Co.",
+      "weight_gsm": null,
+      "width_cm": 150.0
+    },
+    "platform_row": {
+      "source": "mock.materials",
+      "source_id": "mat-0008",
+      "code": "MOCK-0008",
+      "composition": [
+        {
+          "fiber": "Viscose",
+          "percent": 95.0,
+          "raw": "95%VI"
+        },
+        {
+          "fiber": "Polyester",
+          "percent": 5.0,
+          "raw": "5%PES"
+        }
+      ],
+      "composition_raw": "95%VI/5%PES",
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-001"
+        }
+      },
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "folder_paths": [
+        "Demo Woven"
+      ],
+      "images": [
+        {
+          "height": 96,
+          "local_path": "assets/mat-0008+thumb.bin",
+          "role": "thumb",
+          "sha256": "fc3ef0c136a9b90f0a238aa33897d3e5b59664b70fdf42928116c7d02fac132e",
+          "size_bytes": 2070,
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0008.png",
+          "width": 96
+        },
+        {
+          "height": 192,
+          "local_path": "assets/mat-0008+swatch.bin",
+          "role": "swatch",
+          "sha256": "457ae00357626ee0c68b58d070ab7868f9309739ac7378618bee6141c3dcbb72",
+          "size_bytes": 11098,
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0008.jpg",
+          "width": 192
+        }
+      ],
+      "issues": [
+        "weight_gsm:source_zero"
+      ],
+      "name": "Demo Woven 08",
+      "price": {
+        "amount": "38.95",
+        "currency": "USD"
+      },
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0008",
+      "schema_version": 1,
+      "source_version": "2026-01-01T00:08:00Z",
+      "supplier": "Demo Mill Co.",
+      "weight_gsm": null,
+      "width_cm": 150.0
+    }
+  },
+  "run_2": {
+    "raw_list_row": null,
+    "raw_detail_response": null,
+    "normalized_record": null,
+    "sqlite_row": {
+      "source": "mock.materials",
+      "source_id": "mat-0008",
+      "code": "MOCK-0008",
+      "composition": [
+        {
+          "fiber": "Viscose",
+          "percent": 95.0,
+          "raw": "95%VI"
+        },
+        {
+          "fiber": "Polyester",
+          "percent": 5.0,
+          "raw": "5%PES"
+        }
+      ],
+      "composition_raw": "95%VI/5%PES",
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-001"
+        }
+      },
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "folder_paths": [
+        "Demo Woven"
+      ],
+      "images": [
+        {
+          "height": 96,
+          "local_path": "assets/mat-0008+thumb.bin",
+          "role": "thumb",
+          "sha256": "fc3ef0c136a9b90f0a238aa33897d3e5b59664b70fdf42928116c7d02fac132e",
+          "size_bytes": 2070,
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0008.png",
+          "width": 96
+        },
+        {
+          "height": 192,
+          "local_path": "assets/mat-0008+swatch.bin",
+          "role": "swatch",
+          "sha256": "457ae00357626ee0c68b58d070ab7868f9309739ac7378618bee6141c3dcbb72",
+          "size_bytes": 11098,
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0008.jpg",
+          "width": 192
+        }
+      ],
+      "issues": [
+        "weight_gsm:source_zero"
+      ],
+      "name": "Demo Woven 08",
+      "price": {
+        "amount": "38.95",
+        "currency": "USD"
+      },
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0008",
+      "schema_version": 1,
+      "source_version": "2026-01-01T00:08:00Z",
+      "supplier": "Demo Mill Co.",
+      "weight_gsm": null,
+      "width_cm": 150.0,
+      "ops_note": null
+    },
+    "platform_row": {
+      "source": "mock.materials",
+      "source_id": "mat-0008",
+      "code": "MOCK-0008",
+      "composition": [
+        {
+          "fiber": "Viscose",
+          "percent": 95.0,
+          "raw": "95%VI"
+        },
+        {
+          "fiber": "Polyester",
+          "percent": 5.0,
+          "raw": "5%PES"
+        }
+      ],
+      "composition_raw": "95%VI/5%PES",
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-001"
+        }
+      },
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "folder_paths": [
+        "Demo Woven"
+      ],
+      "images": [
+        {
+          "height": 96,
+          "local_path": "assets/mat-0008+thumb.bin",
+          "role": "thumb",
+          "sha256": "fc3ef0c136a9b90f0a238aa33897d3e5b59664b70fdf42928116c7d02fac132e",
+          "size_bytes": 2070,
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0008.png",
+          "width": 96
+        },
+        {
+          "height": 192,
+          "local_path": "assets/mat-0008+swatch.bin",
+          "role": "swatch",
+          "sha256": "457ae00357626ee0c68b58d070ab7868f9309739ac7378618bee6141c3dcbb72",
+          "size_bytes": 11098,
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0008.jpg",
+          "width": 192
+        }
+      ],
+      "issues": [
+        "weight_gsm:source_zero"
+      ],
+      "name": "Demo Woven 08",
+      "price": {
+        "amount": "38.95",
+        "currency": "USD"
+      },
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0008",
+      "schema_version": 1,
+      "source_version": "2026-01-01T00:08:00Z",
+      "supplier": "Demo Mill Co.",
+      "weight_gsm": null,
+      "width_cm": 150.0,
+      "ops_note": null
+    }
+  }
+}

@@ -1,0 +1,412 @@
+{
+  "run_1": {
+    "raw_list_row": {
+      "id": "mat-0002",
+      "type": "material",
+      "code": "MOCK-0002",
+      "name": "Demo Woven 02",
+      "price": 0,
+      "currency": "USD",
+      "thumbnail_url": "http://127.0.0.1:8765/media/thumb/mat-0002.png",
+      "updated_at": "2026-01-01T00:02:00Z"
+    },
+    "raw_detail_response": {
+      "http_status": 200,
+      "body": {
+        "state": true,
+        "data": {
+          "data": {
+            "id": "mat-0002",
+            "code": "MOCK-0002",
+            "name": "Demo Woven 02",
+            "price": "38.87",
+            "currency": "USD",
+            "weight": "250 gsm",
+            "composition": "70%EA/30%PES",
+            "supplier_id": "sup-002",
+            "supplier_name": "Sample Textiles Ltd.",
+            "thumbs": [],
+            "swatch_url": "http://127.0.0.1:8765/media/swatch/mat-0002.jpg"
+          }
+        }
+      }
+    },
+    "normalized_record": {
+      "source": "mock.materials",
+      "source_id": "mat-0002",
+      "code": "MOCK-0002",
+      "name": "Demo Woven 02",
+      "composition": [
+        {
+          "fiber": "Elastane",
+          "percent": 70.0,
+          "raw": "70%EA"
+        },
+        {
+          "fiber": "Polyester",
+          "percent": 30.0,
+          "raw": "30%PES"
+        }
+      ],
+      "composition_raw": "70%EA/30%PES",
+      "weight_gsm": 250.0,
+      "width_cm": null,
+      "price": {
+        "amount": "38.87",
+        "currency": "USD"
+      },
+      "category": null,
+      "use_cases": [],
+      "tags": [],
+      "supplier": "Sample Textiles Ltd.",
+      "folder_paths": [
+        "Demo Woven"
+      ],
+      "images": [
+        {
+          "role": "thumb",
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0002.png",
+          "local_path": "assets/mat-0002+thumb.bin",
+          "sha256": "21d8b1b748f41a4966fe0cc5c1e4d76ca1bc1706767f93239f30993d8e2e8bcb",
+          "width": 96,
+          "height": 96,
+          "size_bytes": 1989
+        },
+        {
+          "role": "swatch",
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0002.jpg",
+          "local_path": "assets/mat-0002+swatch.bin",
+          "sha256": "2e34afe9ec695658b4d7b635ba884d6a7ad67cb3b968f80e94cb0bced84b883d",
+          "width": 192,
+          "height": 192,
+          "size_bytes": 11097
+        }
+      ],
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-002"
+        }
+      },
+      "issues": [],
+      "source_version": "2026-01-01T00:02:00Z",
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0002",
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "normalized_at": "2026-10-27T09:02:00+00:00",
+      "schema_version": 1
+    },
+    "sqlite_row": {
+      "source": "mock.materials",
+      "source_id": "mat-0002",
+      "code": "MOCK-0002",
+      "composition": [
+        {
+          "fiber": "Elastane",
+          "percent": 70.0,
+          "raw": "70%EA"
+        },
+        {
+          "fiber": "Polyester",
+          "percent": 30.0,
+          "raw": "30%PES"
+        }
+      ],
+      "composition_raw": "70%EA/30%PES",
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-002"
+        }
+      },
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "folder_paths": [
+        "Demo Woven"
+      ],
+      "images": [
+        {
+          "height": 96,
+          "local_path": "assets/mat-0002+thumb.bin",
+          "role": "thumb",
+          "sha256": "21d8b1b748f41a4966fe0cc5c1e4d76ca1bc1706767f93239f30993d8e2e8bcb",
+          "size_bytes": 1989,
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0002.png",
+          "width": 96
+        },
+        {
+          "height": 192,
+          "local_path": "assets/mat-0002+swatch.bin",
+          "role": "swatch",
+          "sha256": "2e34afe9ec695658b4d7b635ba884d6a7ad67cb3b968f80e94cb0bced84b883d",
+          "size_bytes": 11097,
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0002.jpg",
+          "width": 192
+        }
+      ],
+      "issues": [],
+      "name": "Demo Woven 02",
+      "price": {
+        "amount": "38.87",
+        "currency": "USD"
+      },
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0002",
+      "schema_version": 1,
+      "source_version": "2026-01-01T00:02:00Z",
+      "supplier": "Sample Textiles Ltd.",
+      "weight_gsm": 250.0,
+      "width_cm": null
+    },
+    "platform_row": {
+      "source": "mock.materials",
+      "source_id": "mat-0002",
+      "code": "MOCK-0002",
+      "composition": [
+        {
+          "fiber": "Elastane",
+          "percent": 70.0,
+          "raw": "70%EA"
+        },
+        {
+          "fiber": "Polyester",
+          "percent": 30.0,
+          "raw": "30%PES"
+        }
+      ],
+      "composition_raw": "70%EA/30%PES",
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-002"
+        }
+      },
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "folder_paths": [
+        "Demo Woven"
+      ],
+      "images": [
+        {
+          "height": 96,
+          "local_path": "assets/mat-0002+thumb.bin",
+          "role": "thumb",
+          "sha256": "21d8b1b748f41a4966fe0cc5c1e4d76ca1bc1706767f93239f30993d8e2e8bcb",
+          "size_bytes": 1989,
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0002.png",
+          "width": 96
+        },
+        {
+          "height": 192,
+          "local_path": "assets/mat-0002+swatch.bin",
+          "role": "swatch",
+          "sha256": "2e34afe9ec695658b4d7b635ba884d6a7ad67cb3b968f80e94cb0bced84b883d",
+          "size_bytes": 11097,
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0002.jpg",
+          "width": 192
+        }
+      ],
+      "issues": [],
+      "name": "Demo Woven 02",
+      "price": {
+        "amount": "38.87",
+        "currency": "USD"
+      },
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0002",
+      "schema_version": 1,
+      "source_version": "2026-01-01T00:02:00Z",
+      "supplier": "Sample Textiles Ltd.",
+      "weight_gsm": 250.0,
+      "width_cm": null
+    }
+  },
+  "run_2": {
+    "raw_list_row": {
+      "id": "mat-0002",
+      "type": "material",
+      "code": "MOCK-0002",
+      "name": "Demo Woven 02",
+      "price": 0,
+      "currency": "USD",
+      "thumbnail_url": "http://127.0.0.1:8765/media/thumb/mat-0002.png",
+      "updated_at": "2026-01-01T00:02:00Z"
+    },
+    "raw_detail_response": null,
+    "normalized_record": {
+      "source": "mock.materials",
+      "source_id": "mat-0002",
+      "code": "MOCK-0002",
+      "name": "Demo Woven 02",
+      "composition": [
+        {
+          "fiber": "Elastane",
+          "percent": 70.0,
+          "raw": "70%EA"
+        },
+        {
+          "fiber": "Polyester",
+          "percent": 30.0,
+          "raw": "30%PES"
+        }
+      ],
+      "composition_raw": "70%EA/30%PES",
+      "weight_gsm": 250.0,
+      "width_cm": null,
+      "price": {
+        "amount": "38.87",
+        "currency": "USD"
+      },
+      "category": null,
+      "use_cases": [],
+      "tags": [],
+      "supplier": "Sample Textiles Ltd.",
+      "folder_paths": [
+        "Demo Woven"
+      ],
+      "images": [
+        {
+          "role": "thumb",
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0002.png",
+          "local_path": "assets/mat-0002+thumb.bin",
+          "sha256": "21d8b1b748f41a4966fe0cc5c1e4d76ca1bc1706767f93239f30993d8e2e8bcb",
+          "width": 96,
+          "height": 96,
+          "size_bytes": 1989
+        },
+        {
+          "role": "swatch",
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0002.jpg",
+          "local_path": "assets/mat-0002+swatch.bin",
+          "sha256": "2e34afe9ec695658b4d7b635ba884d6a7ad67cb3b968f80e94cb0bced84b883d",
+          "width": 192,
+          "height": 192,
+          "size_bytes": 11097
+        }
+      ],
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-002"
+        }
+      },
+      "issues": [],
+      "source_version": "2026-01-01T00:02:00Z",
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0002",
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "normalized_at": "2026-10-27T09:07:00+00:00",
+      "schema_version": 1
+    },
+    "sqlite_row": {
+      "source": "mock.materials",
+      "source_id": "mat-0002",
+      "code": "MOCK-0002",
+      "composition": [
+        {
+          "fiber": "Elastane",
+          "percent": 70.0,
+          "raw": "70%EA"
+        },
+        {
+          "fiber": "Polyester",
+          "percent": 30.0,
+          "raw": "30%PES"
+        }
+      ],
+      "composition_raw": "70%EA/30%PES",
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-002"
+        }
+      },
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "folder_paths": [
+        "Demo Woven"
+      ],
+      "images": [
+        {
+          "height": 96,
+          "local_path": "assets/mat-0002+thumb.bin",
+          "role": "thumb",
+          "sha256": "21d8b1b748f41a4966fe0cc5c1e4d76ca1bc1706767f93239f30993d8e2e8bcb",
+          "size_bytes": 1989,
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0002.png",
+          "width": 96
+        },
+        {
+          "height": 192,
+          "local_path": "assets/mat-0002+swatch.bin",
+          "role": "swatch",
+          "sha256": "2e34afe9ec695658b4d7b635ba884d6a7ad67cb3b968f80e94cb0bced84b883d",
+          "size_bytes": 11097,
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0002.jpg",
+          "width": 192
+        }
+      ],
+      "issues": [],
+      "name": "Demo Woven 02",
+      "price": {
+        "amount": "38.87",
+        "currency": "USD"
+      },
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0002",
+      "schema_version": 1,
+      "source_version": "2026-01-01T00:02:00Z",
+      "supplier": "Sample Textiles Ltd.",
+      "weight_gsm": 250.0,
+      "width_cm": null,
+      "ops_note": null
+    },
+    "platform_row": {
+      "source": "mock.materials",
+      "source_id": "mat-0002",
+      "code": "MOCK-0002",
+      "composition": [
+        {
+          "fiber": "Elastane",
+          "percent": 70.0,
+          "raw": "70%EA"
+        },
+        {
+          "fiber": "Polyester",
+          "percent": 30.0,
+          "raw": "30%PES"
+        }
+      ],
+      "composition_raw": "70%EA/30%PES",
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-002"
+        }
+      },
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "folder_paths": [
+        "Demo Woven"
+      ],
+      "images": [
+        {
+          "height": 96,
+          "local_path": "assets/mat-0002+thumb.bin",
+          "role": "thumb",
+          "sha256": "21d8b1b748f41a4966fe0cc5c1e4d76ca1bc1706767f93239f30993d8e2e8bcb",
+          "size_bytes": 1989,
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0002.png",
+          "width": 96
+        },
+        {
+          "height": 192,
+          "local_path": "assets/mat-0002+swatch.bin",
+          "role": "swatch",
+          "sha256": "2e34afe9ec695658b4d7b635ba884d6a7ad67cb3b968f80e94cb0bced84b883d",
+          "size_bytes": 11097,
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0002.jpg",
+          "width": 192
+        }
+      ],
+      "issues": [],
+      "name": "Demo Woven 02",
+      "price": {
+        "amount": "38.87",
+        "currency": "USD"
+      },
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0002",
+      "schema_version": 1,
+      "source_version": "2026-01-01T00:02:00Z",
+      "supplier": "Sample Textiles Ltd.",
+      "weight_gsm": 250.0,
+      "width_cm": null,
+      "ops_note": null
+    }
+  }
+}

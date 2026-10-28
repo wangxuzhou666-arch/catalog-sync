@@ -1,0 +1,61 @@
+name: scrub
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gitleaks-history:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # the whole history is the point, not just the tip
+      - name: Install gitleaks
+        run: |
+          curl -sSfL -o gitleaks.tar.gz \
+            https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  gitleaks.tar.gz" | sha256sum -c -
+          tar -xzf gitleaks.tar.gz gitleaks
+          sudo install -m 0755 gitleaks /usr/local/bin/gitleaks
+      # Confidential-term rules live in a repository secret, never in the repo. gitleaks cannot
+      # read an [extend] path from the environment, so build a wrapper config at runtime.
+      # Secrets are unavailable to fork PRs: those runs fall back to the public rules.
+      - name: Build gitleaks config
+        env:
+          PRIVATE_RULES: ${{ secrets.CATALOG_SYNC_PRIVATE_RULES }}
+        run: |
+          config="$GITHUB_WORKSPACE/.gitleaks.toml"
+          if [ -n "$PRIVATE_RULES" ]; then
+            config="$RUNNER_TEMP/gitleaks.private.toml"
+            printf '[extend]\npath = "%s"\n\n%s\n' "$GITHUB_WORKSPACE/.gitleaks.toml" "$PRIVATE_RULES" > "$config"
+          else
+            echo "::notice::CATALOG_SYNC_PRIVATE_RULES not available; scanning with the public rules only"
+          fi
+          echo "GITLEAKS_CONFIG_PATH=$config" >> "$GITHUB_ENV"
+      # --redact: a finding must not echo the confidential term it matched into the log.
+      - name: Scan full history
+        run: gitleaks detect --source . --config "$GITLEAKS_CONFIG_PATH" --log-opts=--all --redact --verbose
+
+  private-terms:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      # The list of confidential terms is a repository secret, never a file in the repository.
+      # tools/scrub_scan.py uses only the standard library and never prints a term.
+      - name: Scan the tree and the whole history for the private terms
+        env:
+          PRIVATE_TERMS: ${{ secrets.CATALOG_SYNC_PRIVATE_TERMS }}
+        run: |
+          if [ -z "$PRIVATE_TERMS" ]; then
+            echo "::notice::CATALOG_SYNC_PRIVATE_TERMS not available; the private-term scan was skipped"
+            exit 0
+          fi
+          printf '%s\n' "$PRIVATE_TERMS" > "$RUNNER_TEMP/terms.txt"
+          python3 tools/scrub_scan.py --terms "$RUNNER_TEMP/terms.txt"

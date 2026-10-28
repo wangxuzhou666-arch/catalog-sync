@@ -1,0 +1,130 @@
+title = "catalog-sync public rules"
+
+# Generic rules only. Confidential terms (customer names, real catalogue codes, supplier
+# names) are deliberately NOT listed here: publishing the list would leak it.
+#
+# Private layer: keep those rules in a TOML file outside the repo and put it on top of
+# this one. gitleaks cannot read an [extend] path from the environment, so the wrapper is
+# built at runtime from the env var CATALOG_SYNC_PRIVATE_RULES (a file path locally, a
+# CI secret in .github/workflows/scrub.yml):
+#
+#   [extend]
+#   path = "<absolute path to this .gitleaks.toml>"
+#   <contents of CATALOG_SYNC_PRIVATE_RULES: [[rules]] blocks>
+#
+# then:  gitleaks detect --config <wrapper.toml> --log-opts=--all
+#
+# Every custom rule below has a must-fail and a must-pass sample generated at runtime in
+# tests/test_gates.py (CODING-STYLE R.7); change a rule and that test tells you if it died.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Tool caches, the dependency lock file, and the sha256 an idempotency key is"
+# A sha256 in hex under the name idempotency_key is a content hash that the HTTP sink's protocol
+# (docs/platform-contract.md) names "key"; the generic rule takes it for a secret. Matched on the
+# finding itself (regexTarget = "match"), so a real secret on the same line is still found.
+regexTarget = "match"
+regexes = [
+  '''(?i)^"?idempotency_key"?\s*[:=]\s*"?[0-9a-f]{64}"?$''',
+]
+paths = [
+  '''(^|/)\.git/''',
+  '''(^|/)\.venv/''',
+  '''(^|/)__pycache__/''',
+  '''(^|/)\.(ruff|pytest|mypy)_cache/''',
+  '''(^|/)uv\.lock$''',
+]
+
+[[rules]]
+id = "cs-jwt"
+description = "JSON Web Token: three base64url segments, the first two starting with an encoded JSON object"
+regex = '''eyJ[A-Za-z0-9_-]{8,}\.eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}'''
+keywords = ["eyj"]
+
+[[rules]]
+id = "cs-bearer-token"
+description = "Authorization header value; placeholders such as <token> or {token} do not match"
+regex = '''(?i)\bbearer\s+[A-Za-z0-9._~+/=-]{20,}'''
+keywords = ["bearer"]
+
+# The character classes [r] and [m] keep this file from matching its own pattern.
+[[rules]]
+id = "cs-local-user-path"
+description = "Absolute home-directory path of a macOS or Linux user"
+regex = '''(?m)(?:^|[^A-Za-z0-9_.~-])/(?:Use[r]s|ho[m]e)/[A-Za-z0-9._-]+/'''
+keywords = ["users/", "home/"]
+
+[[rules]]
+id = "cs-personal-email"
+description = "Email address that is not a GitHub noreply, an anthropic noreply or an example domain"
+regex = '''[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}'''
+keywords = ["@"]
+
+[[rules.allowlists]]
+description = "Addresses that are safe by construction"
+regexTarget = "match"
+regexes = [
+  '''@users\.noreply\.github\.com$''',
+  '''@example\.(?:com|org|net)$''',
+  '''^noreply@anthropic\.com$''',
+]
+
+# The class is written with \x{..} escapes so this file contains no CJK itself.
+[[rules]]
+id = "cs-cjk-text"
+description = "CJK characters or CJK/fullwidth punctuation outside the allowlisted files"
+regex = '''[\x{3000}-\x{303f}\x{3400}-\x{4dbf}\x{4e00}-\x{9fff}\x{ff00}-\x{ffef}]+'''
+
+[[rules.allowlists]]
+description = "Chinese README, and the login-page selectors of a connector that must match CJK button labels"
+paths = [
+  '''(^|/)README\.zh-CN\.md$''',
+  # A connector package keeps its login-page selectors in login.py, directly under its package.
+  '''(^|/)connectors/[^/]+/src/[^/]+/login\.py$''',
+]
+
+[[rules.allowlists]]
+description = "The one commit that first added a connector's login selectors, at a path that no longer exists"
+# That file began under src/catalog_sync/plugins/<name>/login.py, before connectors became packages of
+# their own. History is kept as it is, so this old path is allowed by commit, not by widening the
+# path pattern above. Scoped to this rule: any other rule still scans this commit.
+commits = ["4e5745c94cd4dab9d0134d08d3465925191327bb"]
+
+# RE2 has no look-around, so "not a placeholder" is a character class on the first character of the
+# secret ($ { < [ % *) plus an allowlist for the placeholder words.
+[[rules]]
+id = "cs-url-password"
+description = "Password inside scheme://user:password@host, on any host (a compose service name has no dot)"
+regex = '''(?i)\b[a-z][a-z0-9+.-]*://[^\s:/@'"<>{}$]*:[^\s:/@$<{\[%*'"][^\s@/'"]*@[a-z0-9_.\[-]+'''
+keywords = ["://"]
+
+[[rules.allowlists]]
+description = "Placeholder passwords, the well-known fake the tests use, and the CI database's own default"
+regexTarget = "match"
+regexes = [
+  '''(?i):(?:password|passwd|pass|pwd|secret|changeme|change-me|xxx+|your[_-]?password)@''',
+  '''(?i):hunter2[a-z0-9-]*@''',
+  '''//ops:pw@x$''',  # a throwaway URL an earlier version of a test carried; the history keeps it
+  '''(?i)//postgres:postgres@(?:127\.0\.0\.1|localhost)$''',
+]
+
+[[rules]]
+id = "cs-basic-auth"
+description = "Authorization: Basic <base64 of user:password>, as a header, a dict entry or a KEY=value line"
+regex = '''(?i)authorization["']?\s*[:=]\s*["']?basic\s+[A-Za-z0-9+/=_-]{8,}'''
+keywords = ["basic"]
+
+[[rules.allowlists]]
+description = "Placeholder words after the scheme"
+regexTarget = "match"
+regexes = [
+  '''(?i)basic\s+(?:base64|credentials?|encoded|token|xxx+)\b''',
+]
+
+[[rules]]
+id = "cs-cookie"
+description = "A cookie with a value: the Cookie / Set-Cookie header, or a COOKIE=name=value line of a credential file"
+regex = '''(?i)cookie["']?\s*[:=]\s*["']?[A-Za-z0-9_.-]{2,}=[A-Za-z0-9%._~+/=-]{8,}'''
+keywords = ["cookie"]

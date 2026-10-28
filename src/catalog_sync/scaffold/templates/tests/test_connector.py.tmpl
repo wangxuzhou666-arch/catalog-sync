@@ -1,0 +1,287 @@
+"""The {{title}} connector against the synthetic service in tests/fake_service.py.
+
+TODO(connector): these tests are the specification the connector is built to. When you point the
+connector at the real service's shape (paths, field names, envelope), change the fake the same
+way and keep this file green; add a case for every oddity the real service has.
+"""
+
+from __future__ import annotations
+
+import importlib
+import io
+import tomllib
+from collections.abc import Iterator
+from datetime import date
+from pathlib import Path
+
+import pytest
+from catalog_sync.compliance import parse_compliance
+from catalog_sync.errors import (
+    AuthExpired,
+    ComplianceError,
+    ConfigError,
+    ItemFailed,
+    LoginFailed,
+    SourceShapeError,
+)
+from catalog_sync.sdk import SettingKind
+from catalog_sync.sources.base import AssetRef, Inspectable, ListedItem
+from catalog_sync.state import Checkpoint, StateStore
+from catalog_sync.testing.oracle import picked
+from catalog_sync.testing.pipeline import pull_and_normalize
+from PIL import Image
+
+from {{package}}.api import LIST_PATH
+from {{package}}.credentials import (
+    {{name}}_credential_kind,
+    verify_live,
+)
+from {{package}}.settings import {{class_prefix}}Settings
+from {{package}}.source import {{class_prefix}}ItemsSource
+from tests.fake_service import (
+    AUTH_HEADER,
+    BASE_URL,
+    World,
+    expected_record,
+)
+
+ROOT = Path(__file__).resolve().parent.parent
+PACKAGE = ROOT / "src" / "{{package}}"
+MAPPING = PACKAGE / "mappings" / "{{entity}}.yaml"
+EXAMPLE_CONFIG = ROOT / "catalog-sync.example.toml"
+
+
+def make_source(world: World, **options: object) -> {{class_prefix}}ItemsSource:
+    settings = {{class_prefix}}Settings.from_options(
+        {"credential": world.handle(), "request_gap_s": 0, "page_size": 3, **options}
+    )
+    return {{class_prefix}}ItemsSource(settings, seams=world.seams)
+
+
+@pytest.fixture
+def checkpoint(tmp_path: Path) -> Iterator[Checkpoint]:
+    with StateStore(tmp_path / "state.sqlite") as store:
+        store.create_run("run-1", "{{source_name}}")
+        yield store.checkpoint("run-1")
+
+
+# --- options --------------------------------------------------------------------------------------
+
+
+def settings(**options: object) -> {{class_prefix}}Settings:
+    return {{class_prefix}}Settings.from_options({"credential": World().handle(), **options})
+
+
+def test_the_defaults_are_the_services_example_address_and_a_polite_pace() -> None:
+    chosen = settings()
+    assert chosen.base_url == BASE_URL
+    assert chosen.request_gap_s > 0 and chosen.max_requests_per_minute is None
+
+
+@pytest.mark.parametrize(
+    ("options", "complaint"),
+    [
+        ({"nope": 1}, r"unknown option\(s\) \['nope'\]"),
+        ({"page_size": 0}, "'page_size' must be an integer"),
+        ({"base_url": "app.example"}, "'base_url' must look like"),
+    ],
+)
+def test_a_bad_option_is_a_config_error_naming_it(
+    options: dict[str, object], complaint: str
+) -> None:
+    with pytest.raises(ConfigError, match=complaint):
+        settings(**options)
+
+
+def test_the_request_ceiling_raises_an_unset_gap_and_refuses_a_shorter_one() -> None:
+    assert settings(max_requests_per_minute=60).request_gap_s == 1.0
+    with pytest.raises(ComplianceError, match="shorter than 60 / max_requests_per_minute"):
+        settings(max_requests_per_minute=60, request_gap_s=0.5)
+
+
+def test_the_declared_settings_are_the_ones_the_settings_class_reads() -> None:
+    """`catalog-sync init` asks about what is declared; the reader validates against the same
+    declarations, so this only has to check that the defaults they state are the class's."""
+    info = importlib.import_module("{{package}}").item_connector()
+    chosen = settings()
+    for spec in info.settings:
+        if spec.kind is not SettingKind.TABLE and spec.default is not None:
+            assert getattr(chosen, spec.key) == spec.default, spec.key
+    assert info.credential == "{{name}}"
+    assert info.mapping == MAPPING and MAPPING.is_file()
+    assert set(info.credential_settings) <= {spec.key for spec in info.settings}
+
+
+# --- the source -----------------------------------------------------------------------------------
+
+
+def test_every_item_is_listed_in_pages(checkpoint: Checkpoint) -> None:
+    world = World()
+    items = list(make_source(world).enumerate(checkpoint))
+    assert [item.source_id for item in items] == [item.id for item in world.service.items]
+    assert len(world.transport.requests_to(LIST_PATH)) == 3, "seven items, three to a page"
+
+
+def test_the_listing_row_is_kept_as_it_came_with_its_change_marker(checkpoint: Checkpoint) -> None:
+    world = World()
+    first = next(make_source(world).enumerate(checkpoint))
+    assert first.payload["name"] == "Sample item 1" and "status" not in first.payload
+    assert first.version == world.service.items[0].updated_at
+
+
+def test_a_detail_is_the_record_without_its_envelope() -> None:
+    world = World()
+    item = world.service.items[1]
+    detail = make_source(world).fetch_detail(ListedItem(item.id, None, {}, {}))
+    assert detail == {
+        "id": item.id,
+        "name": item.name,
+        "status": item.status,
+        "amount": item.amount,
+        "updated_at": item.updated_at,
+    }
+
+
+def test_a_missing_detail_fails_that_item_only() -> None:
+    with pytest.raises(ItemFailed, match=r"item-999.*HTTP 404"):
+        make_source(World()).fetch_detail(ListedItem("item-999", None, {}, {}))
+
+
+def test_the_picture_comes_from_the_listing_and_is_fetched_without_the_credential(
+    checkpoint: Checkpoint,
+) -> None:
+    world = World()
+    source = make_source(world)
+    row = next(source.enumerate(checkpoint))
+    (ref,) = source.asset_refs(row, None)
+    assert ref == AssetRef(row.source_id, "thumb", f"{BASE_URL}/media/{row.source_id}.png")
+    assert Image.open(io.BytesIO(source.fetch_asset(ref))).format == "JPEG"
+    assert world.transport.requests[-1].header(AUTH_HEADER) is None
+
+
+def test_inspect_reports_the_field_names_of_both_records() -> None:
+    source = make_source(World())
+    assert isinstance(source, Inspectable)
+    report = source.inspect(None)
+    assert any(note.startswith("listing row fields: ") for note in report.notes)
+    assert any("status" in note for note in report.notes if note.startswith("detail record"))
+    with pytest.raises(SourceShapeError, match="flat list"):
+        source.inspect("some-folder")
+
+
+def test_a_credential_the_service_refuses_is_one_request_then_auth_expired(
+    checkpoint: Checkpoint,
+) -> None:
+    world = World()
+    stale = make_source(world, credential=world.stale_handle())
+    with pytest.raises(AuthExpired, match="catalog-sync login {{name}}"):
+        list(stale.enumerate(checkpoint))
+    assert len(world.transport.requests) == 1, "a 401 is never retried"
+
+
+# --- the whole pipeline ---------------------------------------------------------------------------
+
+
+def test_pull_and_normalize_store_what_the_dataset_says(tmp_path: Path) -> None:
+    world = World()
+    result = pull_and_normalize(make_source(world), mapping=MAPPING, workdir=tmp_path)
+    assert result.report.failures == () and result.normalized.skipped == ()
+    rows = result.rows()
+    assert set(rows) == {item.id for item in world.service.items}
+    for item in world.service.items:
+        expected = expected_record(item)
+        assert picked(rows[item.id], expected) == expected, item.id  # type: ignore[arg-type]
+
+
+# --- the credential -------------------------------------------------------------------------------
+
+
+def test_the_credential_kind_reads_only_the_options_it_knows() -> None:
+    with pytest.raises(ConfigError, match="unknown option"):
+        {{name}}_credential_kind({"nope": 1}, base_dir=Path())
+    options = {"base_url": "https://app.elsewhere.example/"}
+    kind = {{name}}_credential_kind(options, base_dir=Path())
+    assert kind.layout.host_suffixes == ("app.elsewhere.example",)
+
+
+def test_a_stored_credential_is_proven_by_asking_for_one_page() -> None:
+    world = World()
+    verify_live(world.credential(), base_url=BASE_URL, seams=world.seams)
+    assert [request.path for request in world.transport.requests] == [LIST_PATH]
+
+
+def test_a_credential_the_service_rejects_fails_the_login_after_one_request() -> None:
+    world = World()
+    with pytest.raises(LoginFailed, match="rejected it"):
+        verify_live(world.stale_credential(), base_url=BASE_URL, seams=world.seams)
+    assert len(world.transport.requests) == 1
+
+
+# --- the compliance declaration -------------------------------------------------------------------
+
+PLACEHOLDERS = ("data_owner", "authorization", "authorization_ref", "tos_url", "tos_reviewed_on")
+
+
+def example_block() -> dict[str, object]:
+    config = tomllib.loads(EXAMPLE_CONFIG.read_text(encoding="utf-8"))
+    return dict(config["sources"]["{{name}}-items"]["compliance"])
+
+
+def parse(block: dict[str, object]) -> object:
+    return parse_compliance(block, label="sources.{{name}}-items", today=date.today())
+
+
+def real_values() -> dict[str, object]:
+    """What an operator would write; the values are invented."""
+    return {
+        "data_owner": "Example Co",
+        "authorization": "own_account",
+        "authorization_ref": "tickets/EX-1",
+        "tos_url": "https://app.example.invalid/terms",
+        "tos_reviewed_on": date.today(),
+    }
+
+
+def test_the_example_compliance_block_is_refused_until_it_is_filled_in() -> None:
+    with pytest.raises(ComplianceError):
+        parse(example_block())
+    assert parse({**example_block(), **real_values()}) is not None
+
+
+@pytest.mark.parametrize("key", PLACEHOLDERS)
+def test_each_placeholder_alone_is_enough_to_refuse(key: str) -> None:
+    filled = {**example_block(), **real_values()}
+    filled[key] = example_block()[key]
+    with pytest.raises(ComplianceError, match=key):
+        parse(filled)
+
+
+def test_the_example_config_names_the_source_it_registers() -> None:
+    config = tomllib.loads(EXAMPLE_CONFIG.read_text(encoding="utf-8"))
+    assert config["sources"]["{{name}}-items"]["plugin"] == "{{source_name}}"
+    assert config["profiles"]["{{name}}"]["source"] == "{{name}}-items"
+
+
+# --- the package ----------------------------------------------------------------------------------
+
+
+def test_every_entry_point_in_pyproject_points_at_something_that_exists() -> None:
+    project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]
+    groups = project["entry-points"]
+    assert set(groups) == {
+        "catalog_sync.sources",
+        "catalog_sync.credentials",
+        "catalog_sync.connectors",
+        "catalog_sync.schemas",
+    }
+    for group, entries in groups.items():
+        for name, target in entries.items():
+            module_name, _, attribute = target.partition(":")
+            obj = importlib.import_module(module_name)
+            for part in attribute.split("."):
+                obj = getattr(obj, part)
+            assert callable(obj), f"{group} {name} -> {target}"
+    schema_path = importlib.import_module("{{package}}").item_schema()
+    assert schema_path.is_file() and schema_path.name == "{{entity}}.yaml"
+    factory = "{{package}}.source:{{class_prefix}}ItemsSource.from_options"
+    assert groups["catalog_sync.sources"] == {{{class_prefix}}ItemsSource.name: factory}

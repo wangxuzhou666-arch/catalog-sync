@@ -1,0 +1,38 @@
+$ catalog-sync pull mock-materials
+run 20261027T090600Z-xxxxxx (mock.materials): complete
+  items: 7
+  list   : 7 done
+  detail : 2 done, 5 skipped
+  assets : 2 done, 5 skipped
+  fetched this time: 2 detail, 2 assets
+[exit 0]
+$ catalog-sync normalize mock-materials --mapping src/catalog_sync/plugins/mock/mappings/materials.yaml --out run-2/normalized.jsonl
+normalized run 20261027T090600Z-xxxxxx (mock.materials): 7 record(s) -> run-2/normalized.jsonl
+  issues: composition:unknown_code x1, width_cm:unparseable x1
+[exit 0]
+$ catalog-sync load --sink materials-db --input run-2/normalized.jsonl
+load -> materials-db (sqlite), written:
+  inserted 1, updated 1, unchanged 5
+  1 stored row(s) no longer in the source (reported, kept)
+  backup: mock.db.bak-<UTC-STAMP> (7 row(s) before)
+[exit 0]
+$ catalog-sync load --sink platform --input run-2/normalized.jsonl
+load -> platform (http), written:
+  inserted 1, updated 1, unchanged 5
+  1 stored row(s) no longer in the source (reported, kept)
+  backup: none taken: the rows live on the receiving platform, whose own backups and history are the way back (docs/platform-contract.md)
+[exit 0]
+$ catalog-sync runs show 20261027T090600Z-xxxxxx
+run:      20261027T090600Z-xxxxxx
+source:   mock.materials
+status:   complete
+started:  2026-10-27T09:06:00+00:00
+finished: 2026-10-27T09:06:00+00:00
+listing:  complete
+items:    7
+  list   : 7 done
+  detail : 2 done, 5 skipped
+  assets : 2 done, 5 skipped
+cache:    15 file(s), 13.6 kB
+used by:  2 item(s) whose current raw data is in this run
+[exit 0]

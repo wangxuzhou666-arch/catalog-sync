@@ -1,0 +1,147 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "catalog-sync"
+dynamic = ["version"]
+description = "Compliance-first pipeline to integrate your company's data from the SaaS tools it uses into your own platform: collect, clean, normalize, load."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "wangxuzhou666-arch" }]
+dependencies = [
+  "requests>=2.32",
+  "pyyaml>=6.0",
+  "pillow>=10.4",
+]
+
+[project.optional-dependencies]
+browser = ["playwright>=1.47"]
+postgres = ["psycopg[binary]>=3.2"]
+
+[project.scripts]
+catalog-sync = "catalog_sync.cli:main"
+
+# Entry-point values are callables `(options, *, base_dir) -> Source | Sink | CredentialKind`.
+# Third-party packages register theirs under the same groups.
+[project.entry-points."catalog_sync.sources"]
+replay = "catalog_sync.sources.replay:ReplaySource.from_options"
+"mock.materials" = "catalog_sync.plugins.mock.source:MockMaterialsSource.from_options"
+"mock.suppliers" = "catalog_sync.plugins.mock.source:MockSuppliersSource.from_options"
+
+# Sources that only read local files and make no request are exempt from the compliance
+# declaration. A source not listed here is gated, the mock ones included: they make real HTTP calls
+# (to localhost), which is what lets the demo show the gate working.
+[project.entry-points."catalog_sync.local_sources"]
+replay = "catalog_sync.sources.replay:ReplaySource.from_options"
+
+# What `catalog-sync init` needs to set a source up: its settings, credential kind and mapping.
+[project.entry-points."catalog_sync.connectors"]
+"mock.materials" = "catalog_sync.plugins.mock:materials_connector"
+"mock.suppliers" = "catalog_sync.plugins.mock:suppliers_connector"
+
+[project.entry-points."catalog_sync.schemas"]
+supplier = "catalog_sync.plugins.mock:supplier_schema"
+
+[project.entry-points."catalog_sync.code_tables"]
+"mock.saas/materials.composition" = "catalog_sync.plugins.mock:composition_table"
+
+[project.entry-points."catalog_sync.credentials"]
+mock = "catalog_sync.plugins.mock.login:mock_credential_kind"
+
+[project.entry-points."catalog_sync.sinks"]
+jsonl = "catalog_sync.sinks.jsonl:JsonlSink.from_options"
+csv = "catalog_sync.sinks.csv:CsvSink.from_options"
+sqlite = "catalog_sync.sinks.sqlite:SqliteSink.from_options"
+postgres = "catalog_sync.sinks.postgres:PostgresSink.from_options"
+http = "catalog_sync.sinks.http:HttpSink.from_options"
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3",
+  "pytest-socket>=0.7",
+  "ruff>=0.8",
+  "pre-commit>=4.0",
+  "mypy>=2.4.0",
+  "types-requests>=2.33.0.20261006",
+  "types-pyyaml>=6.0.12.20260906",
+]
+
+[tool.hatch.version]
+path = "src/catalog_sync/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/catalog_sync"]
+
+# The source distribution is the repository minus what only the repository's own development uses.
+# connectors/ holds packages that are released on their own (or not at all), never inside this one.
+# .github/ and .gitleaks.toml stay: the tests in the sdist read them. W5 reviews the rest.
+[tool.hatch.build.targets.sdist]
+exclude = [
+  "/connectors",
+  "/.claude",
+  "/.pre-commit-config.yaml",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# "src" keeps tests independent of the editable-install .pth file (see README, Development);
+# "." makes tests.fixtures importable; "tools" lets tests import the dev scripts under test.
+pythonpath = ["src", ".", "tools"]
+# No test may touch the network: every fixture is synthetic and every transport is faked.
+addopts = "-ra --disable-socket --allow-unix-socket"
+markers = [
+  "gitleaks: needs the gitleaks binary (skipped locally if missing, a failure in CI)",
+  "postgres: needs a throw-away Postgres in CATALOG_SYNC_TEST_POSTGRES_DSN (skipped if unset)",
+  "mock: talks to a Mock SaaS running in this process; sockets are allowed to 127.0.0.1 only",
+  "slow: runs another program (uv) for a while; included in the default run and in CI",
+]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["src"]
+
+# Optional extras: the Postgres driver and Playwright are imported only when used, and are absent
+# from an environment that did not ask for them.
+[[tool.mypy.overrides]]
+module = ["psycopg", "psycopg.*", "playwright", "playwright.*"]
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests", "tools"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "BLE", "TRY", "SIM", "RUF", "C901", "UP", "S"]
+# TRY003: descriptive messages at the raise site are the point of fail-fast errors here.
+ignore = ["TRY003"]
+
+[tool.ruff.lint.mccabe]
+# CODING-STYLE P1.2: complexity is only a hint above 15.
+max-complexity = 15
+
+[tool.ruff.lint.per-file-ignores]
+# S105/S106: tests compare against synthetic token strings; the names alone trip the rule.
+"tests/**" = ["S101", "S105", "S106", "S603", "S607"]
+# The Postgres tests build statements around schema names they generated themselves.
+"tests/test_sink_postgres.py" = ["S608"]
+# The contract suite is test-support code shipped inside the package; it asserts by design.
+"src/catalog_sync/testing/**" = ["S101"]
+"tools/**" = ["S603", "S607"]
+# The acceptance harness states its programmer-error preconditions with assert (a scenario run out
+# of order, a server used before it started), like the tests it sits next to.
+"tools/acceptance*.py" = ["S101"]
+# SQL identifiers (table and column names) cannot be bound as parameters, so this module splices
+# them in after `_identifier` has checked each one against a plain-name pattern; every value is
+# bound.
+"src/catalog_sync/sinks/sqlite.py" = ["S608"]
+# The reference platform splices the entity name (a plain identifier) into its queries too.
+"src/catalog_sync/mock/platform_store.py" = ["S608"]
+# Same for the Postgres sink: names are checked by `plain_identifier` and quoted, values are bound.
+"src/catalog_sync/sinks/postgres.py" = ["S608"]
+# Puts the repo root on sys.path before importing the test builders.
+"tools/make_synthetic.py" = ["E402", "I001"]

@@ -1,0 +1,25 @@
+#@ fake_constants
+AUTH_HEADER = "authorization"
+AUTH_VALUE = "Bearer fake-token-0001"
+LOGIN_PATH = "/api/login"
+ACCOUNT = {"username": "demo", "password": "demo-password"}
+
+#@ fake_login
+        if request.path == LOGIN_PATH:
+            return self._login(request)
+#@ fake_login_method
+    def _login(self, request: RecordedRequest) -> FakeResponse:
+        if request.json_body() != ACCOUNT:
+            return FakeResponse(401)
+        return FakeResponse.json(envelope({"token": AUTH_VALUE.removeprefix("Bearer ")}))
+
+#@ toml_credential
+renew_before_days = 2               # how soon before a token's expiry `auth status` says "renew soon"
+# base_url = "https://{{host}}"     # only if the web app lives somewhere else than the API
+
+#@ readme_auth
+A bearer token obtained by logging in with one HTTP request: `catalog-sync login {{name}} --form`
+posts `{{env_prefix}}_USER` / `{{env_prefix}}_PASSWORD` (environment variables; the tool never reads a
+`.env` file) to the login address in `credentials.py` and stores the token the answer carries. No
+browser is involved, so it also works in CI. Adjust the address, the field names, the token's place
+in the answer, and `encoding="form"` if the login is a form post rather than JSON.

@@ -1,0 +1,14 @@
+# Fibre codes of the Mock SaaS's materials, as its composition strings write them ("60%CO/40%PES").
+# The scope is this service's endpoint; tables are never merged across scopes. The mock sometimes
+# writes a code that is not listed here (ZZ) so that an unknown code, which becomes an issue and
+# never a guess, can be seen in a pull.
+scope: mock.saas/materials
+kind: composition
+codes:
+  CO: Cotton
+  PES: Polyester
+  LI: Linen
+  WO: Wool
+  EA: Elastane
+  PA: Polyamide
+  VI: Viscose

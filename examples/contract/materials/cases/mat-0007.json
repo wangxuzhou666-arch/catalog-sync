@@ -1,0 +1,235 @@
+{
+  "run_1": {
+    "raw_list_row": {
+      "id": "mat-0007",
+      "type": "material",
+      "code": "MOCK-0007",
+      "name": "Demo Plain 07",
+      "price": 0,
+      "currency": "USD",
+      "thumbnail_url": "http://127.0.0.1:8765/media/thumb/mat-0007.png",
+      "updated_at": "2026-01-01T00:07:00Z"
+    },
+    "raw_detail_response": {
+      "http_status": 404,
+      "body": {
+        "state": false,
+        "msg": "no such material"
+      }
+    },
+    "normalized_record": null,
+    "sqlite_row": null,
+    "platform_row": null
+  },
+  "run_2": {
+    "raw_list_row": {
+      "id": "mat-0007",
+      "type": "material",
+      "code": "MOCK-0007",
+      "name": "Demo Plain 07",
+      "price": 0,
+      "currency": "USD",
+      "thumbnail_url": "http://127.0.0.1:8765/media/thumb/mat-0007.png",
+      "updated_at": "2026-01-01T00:07:00Z"
+    },
+    "raw_detail_response": {
+      "http_status": 200,
+      "body": {
+        "state": true,
+        "data": {
+          "data": {
+            "id": "mat-0007",
+            "code": "MOCK-0007",
+            "name": "Demo Plain 07",
+            "price": "36.94",
+            "currency": "USD",
+            "weight": "160 gsm",
+            "width": "148",
+            "composition": "70%LI/30%EA",
+            "supplier_id": "sup-004",
+            "supplier_name": "Example Knits Inc.",
+            "thumbs": [],
+            "swatch_url": "http://127.0.0.1:8765/media/swatch/mat-0007.jpg"
+          }
+        }
+      }
+    },
+    "normalized_record": {
+      "source": "mock.materials",
+      "source_id": "mat-0007",
+      "code": "MOCK-0007",
+      "name": "Demo Plain 07",
+      "composition": [
+        {
+          "fiber": "Linen",
+          "percent": 70.0,
+          "raw": "70%LI"
+        },
+        {
+          "fiber": "Elastane",
+          "percent": 30.0,
+          "raw": "30%EA"
+        }
+      ],
+      "composition_raw": "70%LI/30%EA",
+      "weight_gsm": 160.0,
+      "width_cm": 148.0,
+      "price": {
+        "amount": "36.94",
+        "currency": "USD"
+      },
+      "category": null,
+      "use_cases": [],
+      "tags": [],
+      "supplier": "Example Knits Inc.",
+      "folder_paths": [],
+      "images": [
+        {
+          "role": "thumb",
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0007.png",
+          "local_path": "assets/mat-0007+thumb.bin",
+          "sha256": "49487de75ee3cd3f416593140b7d15550da2357a3b0201128903397b635ab3aa",
+          "width": 96,
+          "height": 96,
+          "size_bytes": 3009
+        },
+        {
+          "role": "swatch",
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0007.jpg",
+          "local_path": "assets/mat-0007+swatch.bin",
+          "sha256": "f0d86105983742a453efe19348a4ff2e45a4feb58a43923b4bd78a3d61fe1101",
+          "width": 192,
+          "height": 192,
+          "size_bytes": 5985
+        }
+      ],
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-004"
+        }
+      },
+      "issues": [],
+      "source_version": "2026-01-01T00:07:00Z",
+      "raw_ref": "20261027T090600Z-xxxxxx:mat-0007",
+      "fetched_at": "2026-10-27T09:06:00+00:00",
+      "normalized_at": "2026-10-27T09:07:00+00:00",
+      "schema_version": 1
+    },
+    "sqlite_row": {
+      "source": "mock.materials",
+      "source_id": "mat-0007",
+      "code": "MOCK-0007",
+      "composition": [
+        {
+          "fiber": "Linen",
+          "percent": 70.0,
+          "raw": "70%LI"
+        },
+        {
+          "fiber": "Elastane",
+          "percent": 30.0,
+          "raw": "30%EA"
+        }
+      ],
+      "composition_raw": "70%LI/30%EA",
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-004"
+        }
+      },
+      "fetched_at": "2026-10-27T09:06:00+00:00",
+      "folder_paths": [],
+      "images": [
+        {
+          "height": 96,
+          "local_path": "assets/mat-0007+thumb.bin",
+          "role": "thumb",
+          "sha256": "49487de75ee3cd3f416593140b7d15550da2357a3b0201128903397b635ab3aa",
+          "size_bytes": 3009,
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0007.png",
+          "width": 96
+        },
+        {
+          "height": 192,
+          "local_path": "assets/mat-0007+swatch.bin",
+          "role": "swatch",
+          "sha256": "f0d86105983742a453efe19348a4ff2e45a4feb58a43923b4bd78a3d61fe1101",
+          "size_bytes": 5985,
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0007.jpg",
+          "width": 192
+        }
+      ],
+      "issues": [],
+      "name": "Demo Plain 07",
+      "price": {
+        "amount": "36.94",
+        "currency": "USD"
+      },
+      "raw_ref": "20261027T090600Z-xxxxxx:mat-0007",
+      "schema_version": 1,
+      "source_version": "2026-01-01T00:07:00Z",
+      "supplier": "Example Knits Inc.",
+      "weight_gsm": 160.0,
+      "width_cm": 148.0,
+      "ops_note": null
+    },
+    "platform_row": {
+      "source": "mock.materials",
+      "source_id": "mat-0007",
+      "code": "MOCK-0007",
+      "composition": [
+        {
+          "fiber": "Linen",
+          "percent": 70.0,
+          "raw": "70%LI"
+        },
+        {
+          "fiber": "Elastane",
+          "percent": 30.0,
+          "raw": "30%EA"
+        }
+      ],
+      "composition_raw": "70%LI/30%EA",
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-004"
+        }
+      },
+      "fetched_at": "2026-10-27T09:06:00+00:00",
+      "folder_paths": [],
+      "images": [
+        {
+          "height": 96,
+          "local_path": "assets/mat-0007+thumb.bin",
+          "role": "thumb",
+          "sha256": "49487de75ee3cd3f416593140b7d15550da2357a3b0201128903397b635ab3aa",
+          "size_bytes": 3009,
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0007.png",
+          "width": 96
+        },
+        {
+          "height": 192,
+          "local_path": "assets/mat-0007+swatch.bin",
+          "role": "swatch",
+          "sha256": "f0d86105983742a453efe19348a4ff2e45a4feb58a43923b4bd78a3d61fe1101",
+          "size_bytes": 5985,
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0007.jpg",
+          "width": 192
+        }
+      ],
+      "issues": [],
+      "name": "Demo Plain 07",
+      "price": {
+        "amount": "36.94",
+        "currency": "USD"
+      },
+      "raw_ref": "20261027T090600Z-xxxxxx:mat-0007",
+      "schema_version": 1,
+      "source_version": "2026-01-01T00:07:00Z",
+      "supplier": "Example Knits Inc.",
+      "weight_gsm": 160.0,
+      "width_cm": 148.0,
+      "ops_note": null
+    }
+  }
+}

@@ -1,0 +1,62 @@
+# The image needs pyproject.toml, uv.lock, README.md, LICENSE and src/ (see the Dockerfile).
+# Everything below keeps the rest, and above all anything private, out of the build context.
+# A pattern without `**/` matches at the top of the context only.
+
+# Version control and environments
+.git
+.github
+.venv
+.gitignore
+.gitleaks.toml
+.pre-commit-config.yaml
+
+# Caches and build output
+**/__pycache__
+**/*.py[cod]
+**/*.egg-info
+build
+dist
+.pytest_cache
+.ruff_cache
+.mypy_cache
+.coverage
+htmlcov
+
+# Workspace artefacts: other people's data, and the state that goes with it
+out
+cache
+runs
+secrets
+browser
+browser-profile
+.browser_profile
+**/state.sqlite*
+**/audit.jsonl
+**/*.db
+**/*.db-journal
+**/*.sqlite
+**/schedule-*.lock
+**/*.jsonl.lock
+**/*.csv.lock
+mock.pid
+mock.log
+
+# Credentials and local configuration
+**/.env
+**/.env.*
+**/*curl*.txt
+**/*.cred
+**/*.token
+credentials
+creds
+catalog-sync.toml
+
+# Not needed at run time (connectors/ holds packages released on their own, never in this image)
+connectors
+tests
+tools
+docs
+examples
+deploy
+Dockerfile
+.dockerignore

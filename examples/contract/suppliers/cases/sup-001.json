@@ -1,0 +1,111 @@
+{
+  "raw_list_row": {
+    "id": "sup-001",
+    "name": "Demo Mill Co.",
+    "country": "Testonia",
+    "rating": 3.2,
+    "lead_time_days": 53,
+    "certifications": [
+      "Demo Cert A"
+    ],
+    "contact_email": "supplier-001@example.com",
+    "address": {
+      "line1": "1 Demo Street",
+      "city": "Demo City",
+      "postcode": "00000"
+    },
+    "listed_at": "2026-01-01T00:00:00Z"
+  },
+  "normalized_record": {
+    "source": "mock.suppliers",
+    "source_id": "sup-001",
+    "name": "Demo Mill Co.",
+    "country": "Testonia",
+    "rating": 3.2,
+    "lead_time_days": 53,
+    "certifications": [
+      "Demo Cert A"
+    ],
+    "contact_email": "supplier-001@example.com",
+    "address": {
+      "city": "Demo City",
+      "line1": "1 Demo Street",
+      "postcode": "00000"
+    },
+    "listed_at": "2026-01-01T00:00:00+00:00",
+    "extra": {},
+    "issues": [],
+    "source_version": "sha256:<salted-hash>",
+    "raw_ref": "20261027T091100Z-xxxxxx:sup-001",
+    "fetched_at": "2026-10-27T09:11:00+00:00",
+    "normalized_at": "2026-10-27T09:12:00+00:00",
+    "schema_version": 1
+  },
+  "sqlite_row_default_policy_drop": {
+    "source": "mock.suppliers",
+    "source_id": "sup-001",
+    "address": {
+      "city": "Demo City",
+      "line1": "1 Demo Street",
+      "postcode": "00000"
+    },
+    "certifications": [
+      "Demo Cert A"
+    ],
+    "country": "Testonia",
+    "fetched_at": "2026-10-27T09:11:00+00:00",
+    "issues": [],
+    "lead_time_days": 53,
+    "listed_at": "2026-01-01T00:00:00+00:00",
+    "name": "Demo Mill Co.",
+    "rating": 3.2,
+    "raw_ref": "20261027T091100Z-xxxxxx:sup-001",
+    "schema_version": 1,
+    "source_version": "sha256:<salted-hash>"
+  },
+  "sqlite_row_policy_hash": {
+    "source": "mock.suppliers",
+    "source_id": "sup-001",
+    "address": {
+      "city": "Demo City",
+      "line1": "1 Demo Street",
+      "postcode": "00000"
+    },
+    "certifications": [
+      "Demo Cert A"
+    ],
+    "contact_email": "sha256:<salted-hash>",
+    "country": "Testonia",
+    "fetched_at": "2026-10-27T09:11:00+00:00",
+    "issues": [],
+    "lead_time_days": 53,
+    "listed_at": "2026-01-01T00:00:00+00:00",
+    "name": "Demo Mill Co.",
+    "rating": 3.2,
+    "raw_ref": "20261027T091100Z-xxxxxx:sup-001",
+    "schema_version": 1,
+    "source_version": "sha256:<salted-hash>"
+  },
+  "platform_row": {
+    "source": "mock.suppliers",
+    "source_id": "sup-001",
+    "address": {
+      "city": "Demo City",
+      "line1": "1 Demo Street",
+      "postcode": "00000"
+    },
+    "certifications": [
+      "Demo Cert A"
+    ],
+    "country": "Testonia",
+    "fetched_at": "2026-10-27T09:11:00+00:00",
+    "issues": [],
+    "lead_time_days": 53,
+    "listed_at": "2026-01-01T00:00:00+00:00",
+    "name": "Demo Mill Co.",
+    "rating": 3.2,
+    "raw_ref": "20261027T091100Z-xxxxxx:sup-001",
+    "schema_version": 1,
+    "source_version": "sha256:<salted-hash>"
+  }
+}

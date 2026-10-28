@@ -1,0 +1,39 @@
+$ catalog-sync pull mock-materials
+run 20261027T090100Z-xxxxxx (mock.materials): complete with failures
+  items: 8
+  list   : 8 done
+  detail : 7 done, 1 failed
+  assets : 1 pending, 7 done
+  fetched this time: 8 detail, 14 assets
+[stderr]   failed detail mat-0007: detail request answered HTTP 404
+[exit 5]
+$ catalog-sync normalize mock-materials --mapping src/catalog_sync/plugins/mock/mappings/materials.yaml --out run-1/normalized.jsonl
+normalized run 20261027T090100Z-xxxxxx (mock.materials): 7 record(s) -> run-1/normalized.jsonl
+  issues: composition:unknown_code x1, weight_gsm:source_zero x1, width_cm:unparseable x1
+[stderr]   skipped mat-0007: not fully pulled (assets, detail)
+[exit 0]
+$ catalog-sync load --sink materials-db --input run-1/normalized.jsonl
+load -> materials-db (sqlite), written:
+  inserted 7, updated 0, unchanged 0
+  backup: nothing stored yet (0 row(s) before)
+[exit 0]
+$ catalog-sync load --sink platform --input run-1/normalized.jsonl
+load -> platform (http), written:
+  inserted 7, updated 0, unchanged 0
+  backup: none taken: the rows live on the receiving platform, whose own backups and history are the way back (docs/platform-contract.md)
+[exit 0]
+$ catalog-sync runs show 20261027T090100Z-xxxxxx
+run:      20261027T090100Z-xxxxxx
+source:   mock.materials
+status:   complete_with_failures
+started:  2026-10-27T09:01:00+00:00
+finished: 2026-10-27T09:01:00+00:00
+listing:  complete
+items:    8
+  list   : 8 done
+  detail : 7 done, 1 failed
+  assets : 1 pending, 7 done
+cache:    38 file(s), 102.1 kB
+used by:  7 item(s) whose current raw data is in this run
+failed detail mat-0007: detail request answered HTTP 404
+[exit 0]

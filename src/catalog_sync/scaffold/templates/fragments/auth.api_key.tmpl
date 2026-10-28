@@ -1,0 +1,15 @@
+#@ fake_constants
+AUTH_HEADER = "x-api-key"
+AUTH_VALUE = "fake-key-0001"
+
+#@ fake_login
+#@ fake_login_method
+#@ toml_credential
+# base_url = "https://{{host}}"     # only if the web app lives somewhere else than the API
+
+#@ readme_auth
+An API key sent in a request header (`x-api-key` in `credentials.py`; change it to the header the
+service documents). Put it in the credential store with `catalog-sync login {{name}} --paste-curl -`
+(a cURL command that carries the header) or write the file yourself: a line `API_KEY=<the key>` in
+`<workspace>/credentials/{{name}}.cred`, readable by you only (`chmod 600`). A key has no expiry the
+tool can read, so `auth status` reports `unknown`; rotate it on the schedule the service sets.

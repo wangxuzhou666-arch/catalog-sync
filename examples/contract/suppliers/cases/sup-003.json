@@ -1,0 +1,103 @@
+{
+  "raw_list_row": null,
+  "normalized_record": {
+    "source": "mock.suppliers",
+    "source_id": "sup-003",
+    "name": "Placeholder Weavers",
+    "country": "Mockistan",
+    "rating": null,
+    "lead_time_days": 56,
+    "certifications": [
+      "Test Label Gold",
+      "Sample Standard 100",
+      "Demo Cert A"
+    ],
+    "contact_email": "supplier-003@example.com",
+    "address": {
+      "city": "Demo City",
+      "line1": "3 Demo Street",
+      "postcode": "00000"
+    },
+    "listed_at": "2026-01-03T00:00:00+00:00",
+    "extra": {},
+    "issues": [],
+    "source_version": "sha256:<salted-hash>",
+    "raw_ref": "20261027T091100Z-xxxxxx:sup-003",
+    "fetched_at": "2026-10-27T09:11:00+00:00",
+    "normalized_at": "2026-10-27T09:12:00+00:00",
+    "schema_version": 1
+  },
+  "sqlite_row_default_policy_drop": {
+    "source": "mock.suppliers",
+    "source_id": "sup-003",
+    "address": {
+      "city": "Demo City",
+      "line1": "3 Demo Street",
+      "postcode": "00000"
+    },
+    "certifications": [
+      "Test Label Gold",
+      "Sample Standard 100",
+      "Demo Cert A"
+    ],
+    "country": "Mockistan",
+    "fetched_at": "2026-10-27T09:11:00+00:00",
+    "issues": [],
+    "lead_time_days": 56,
+    "listed_at": "2026-01-03T00:00:00+00:00",
+    "name": "Placeholder Weavers",
+    "rating": null,
+    "raw_ref": "20261027T091100Z-xxxxxx:sup-003",
+    "schema_version": 1,
+    "source_version": "sha256:<salted-hash>"
+  },
+  "sqlite_row_policy_hash": {
+    "source": "mock.suppliers",
+    "source_id": "sup-003",
+    "address": {
+      "city": "Demo City",
+      "line1": "3 Demo Street",
+      "postcode": "00000"
+    },
+    "certifications": [
+      "Test Label Gold",
+      "Sample Standard 100",
+      "Demo Cert A"
+    ],
+    "contact_email": "sha256:<salted-hash>",
+    "country": "Mockistan",
+    "fetched_at": "2026-10-27T09:11:00+00:00",
+    "issues": [],
+    "lead_time_days": 56,
+    "listed_at": "2026-01-03T00:00:00+00:00",
+    "name": "Placeholder Weavers",
+    "rating": null,
+    "raw_ref": "20261027T091100Z-xxxxxx:sup-003",
+    "schema_version": 1,
+    "source_version": "sha256:<salted-hash>"
+  },
+  "platform_row": {
+    "source": "mock.suppliers",
+    "source_id": "sup-003",
+    "address": {
+      "city": "Demo City",
+      "line1": "3 Demo Street",
+      "postcode": "00000"
+    },
+    "certifications": [
+      "Test Label Gold",
+      "Sample Standard 100",
+      "Demo Cert A"
+    ],
+    "country": "Mockistan",
+    "fetched_at": "2026-10-27T09:11:00+00:00",
+    "issues": [],
+    "lead_time_days": 56,
+    "listed_at": "2026-01-03T00:00:00+00:00",
+    "name": "Placeholder Weavers",
+    "rating": null,
+    "raw_ref": "20261027T091100Z-xxxxxx:sup-003",
+    "schema_version": 1,
+    "source_version": "sha256:<salted-hash>"
+  }
+}

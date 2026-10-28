@@ -1,0 +1,41 @@
+# Answers for `catalog-sync init --answers examples/init/mock-materials.toml --non-interactive`,
+# set up against the built-in Mock SaaS (catalog-sync mock serve) and the reference platform
+# (catalog-sync mock platform serve). Every key is the question it answers; `init` asks
+# interactively for whatever is missing unless --non-interactive is given.
+#
+# The compliance block is a declaration of fact. Here the facts are those of a demo: the data is
+# invented and the "terms" are a page the mock serves. For a real service every line must be true,
+# and `tos_reviewed = true` means you have read its terms today.
+
+connector = "mock.materials"
+name = "mock-materials"
+
+[settings]
+base_url = "http://127.0.0.1:8765"
+
+[compliance]
+data_owner = "Demo Co (invented data)"
+authorization = "own_account"
+authorization_ref = "demo/mock-saas"
+tos_url = "http://127.0.0.1:8765/terms"
+tos_reviewed = true              # the review date is then today; init never picks one unasked
+max_requests_per_minute = 600
+retention_days = 30
+
+[login]
+method = "form"                  # form | browser | paste | stored
+
+[sample]
+items = 5                        # how many items the trial pull fetches
+
+# Sinks, in order. Relative paths are relative to the config file that is written.
+[[sinks]]
+kind = "sqlite"
+name = "local"
+path = "../init-demo.db"
+
+[[sinks]]
+kind = "http"
+name = "platform"
+url = "http://127.0.0.1:8780/api/v1/ingest"
+auth_header_env = "PLATFORM_TOKEN"    # the NAME of the variable that holds the token

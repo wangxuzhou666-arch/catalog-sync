@@ -1,0 +1,57 @@
+# Mapping for the Mock SaaS's materials, onto the built-in `material` schema.
+#
+# The listing row and the detail record are read side by side and never merged: the row has the
+# picture and a price of 0, the detail has the real price and the weight, composition and a second
+# picture, and an empty `thumbs`. Each rule says where a value may come from, first usable wins.
+version: 1
+source: mock.materials
+schema: material
+
+fields:
+  code:
+    from: [list.code, detail.code]
+
+  name:
+    from: [list.name, detail.name]
+
+  composition_raw:
+    from: [detail.composition]
+
+  composition:
+    from: [detail.composition]
+    parse: composition
+    scope: mock.saas/materials          # unknown codes become issues, never guesses
+
+  weight_gsm:
+    from: [detail.weight]
+    parse: gsm
+    zero_is_missing: true               # the service writes "0 gsm" for "not filled in"
+
+  width_cm:
+    from: [detail.width]
+    parse: width_cm                     # "150cm", "148", '58"' and '57/58"' all occur
+
+  # The listing's price is always 0, so it can never win: a zero is "missing" here.
+  price:
+    from: [detail.price, list.price]
+    parse: money
+    currency: USD                       # the mapping's statement; the service's own field says the same
+    zero_is_missing: true
+
+  supplier:
+    from: [detail.supplier_name]
+
+  folder_paths:
+    from: [context.folder_paths]
+
+  images:
+    roles:
+      thumb:
+        - list.thumbnail_url
+        - detail.thumbs[0].url
+      swatch:
+        - detail.swatch_url
+    on_null: keep_existing              # a failed download must not blank loaded pictures
+
+  extra.mock.supplier_id:
+    from: [detail.supplier_id]

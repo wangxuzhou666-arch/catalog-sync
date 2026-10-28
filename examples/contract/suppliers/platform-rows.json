@@ -1,0 +1,96 @@
+[
+  {
+    "source": "mock.suppliers",
+    "source_id": "sup-001",
+    "address": {
+      "city": "Demo City",
+      "line1": "1 Demo Street",
+      "postcode": "00000"
+    },
+    "certifications": [
+      "Demo Cert A"
+    ],
+    "country": "Testonia",
+    "fetched_at": "2026-10-27T09:11:00+00:00",
+    "issues": [],
+    "lead_time_days": 53,
+    "listed_at": "2026-01-01T00:00:00+00:00",
+    "name": "Demo Mill Co.",
+    "rating": 3.2,
+    "raw_ref": "20261027T091100Z-xxxxxx:sup-001",
+    "schema_version": 1,
+    "source_version": "sha256:<salted-hash>"
+  },
+  {
+    "source": "mock.suppliers",
+    "source_id": "sup-002",
+    "address": {
+      "city": "Demo City",
+      "line1": "2 Demo Street",
+      "postcode": "00000"
+    },
+    "certifications": [
+      "Test Label Gold",
+      "Sample Standard 100",
+      "Demo Cert B"
+    ],
+    "country": "Exampleland",
+    "fetched_at": "2026-10-27T09:11:00+00:00",
+    "issues": [],
+    "lead_time_days": 6,
+    "listed_at": "2026-01-02T00:00:00+00:00",
+    "name": "Sample Textiles Ltd.",
+    "rating": 3.2,
+    "raw_ref": "20261027T091100Z-xxxxxx:sup-002",
+    "schema_version": 1,
+    "source_version": "sha256:<salted-hash>"
+  },
+  {
+    "source": "mock.suppliers",
+    "source_id": "sup-003",
+    "address": {
+      "city": "Demo City",
+      "line1": "3 Demo Street",
+      "postcode": "00000"
+    },
+    "certifications": [
+      "Test Label Gold",
+      "Sample Standard 100",
+      "Demo Cert A"
+    ],
+    "country": "Mockistan",
+    "fetched_at": "2026-10-27T09:11:00+00:00",
+    "issues": [],
+    "lead_time_days": 56,
+    "listed_at": "2026-01-03T00:00:00+00:00",
+    "name": "Placeholder Weavers",
+    "rating": null,
+    "raw_ref": "20261027T091100Z-xxxxxx:sup-003",
+    "schema_version": 1,
+    "source_version": "sha256:<salted-hash>"
+  },
+  {
+    "source": "mock.suppliers",
+    "source_id": "sup-004",
+    "address": {
+      "city": "Demo City",
+      "line1": "4 Demo Street",
+      "postcode": "00000"
+    },
+    "certifications": [
+      "Demo Cert A"
+    ],
+    "country": "Testonia",
+    "fetched_at": "2026-10-27T09:11:00+00:00",
+    "issues": [
+      "listed_at:unparseable"
+    ],
+    "lead_time_days": 6,
+    "listed_at": null,
+    "name": "Example Knits Inc.",
+    "rating": 3.1,
+    "raw_ref": "20261027T091100Z-xxxxxx:sup-004",
+    "schema_version": 1,
+    "source_version": "sha256:<salted-hash>"
+  }
+]

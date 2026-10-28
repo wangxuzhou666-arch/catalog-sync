@@ -1,0 +1,24 @@
+# The material schema: what a record of a fabric or other catalogue material holds.
+#
+# It is the preset the first release shipped with (`schema: material` in a mapping, and the default
+# for a mapping that names none). Changing a field here changes every row a sink stores, so bump
+# schema_version when a field changes meaning.
+version: 1
+entity: material
+schema_version: 1
+key: [source, source_id]
+
+fields:
+  code: {kind: text}
+  name: {kind: text}
+  composition: {kind: json, of: composition}
+  composition_raw: {kind: text}
+  weight_gsm: {kind: real, parse: gsm}
+  width_cm: {kind: real, parse: width_cm}
+  price: {kind: json, of: money}
+  category: {kind: text}
+  use_cases: {kind: json, of: texts}
+  tags: {kind: json, of: texts}
+  supplier: {kind: text}
+  folder_paths: {kind: json, of: texts}
+  images: {kind: json, of: images}

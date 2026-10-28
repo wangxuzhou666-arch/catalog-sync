@@ -1,0 +1,58 @@
+[credentials.mock]
+base_url = "http://127.0.0.1:8765"
+
+[sinks.materials-db]
+kind = "sqlite"
+path = "out/mock.db"
+table = "materials"
+
+[sinks.suppliers-db]
+kind = "sqlite"
+path = "out/mock.db"
+table = "suppliers"
+
+[sinks.suppliers-hashed]
+kind = "sqlite"
+path = "out/mock.db"
+table = "suppliers_hashed"
+sensitive_fields = "hash"
+
+[sinks.platform]
+kind = "http"
+url = "http://127.0.0.1:8780/api/v1/ingest"
+auth_header_env = "PLATFORM_TOKEN"
+batch_size = 5
+
+[sources.mock-materials]
+plugin = "mock.materials"
+credential = "mock"
+base_url = "http://127.0.0.1:8765"
+page_size = 10
+request_gap_s = 0.0001
+
+[sources.mock-materials.compliance]
+data_owner = "Demo Co (invented data)"
+authorization = "own_account"
+authorization_ref = "demo/mock-saas"
+tos_url = "http://127.0.0.1:8765/terms"
+tos_reviewed_on = 2026-10-26
+tos_review_max_age_days = 36500
+max_requests_per_minute = 600000
+retention_days = 7
+
+[sources.mock-suppliers]
+plugin = "mock.suppliers"
+credential = "mock"
+base_url = "http://127.0.0.1:8765"
+page_size = 4
+request_gap_s = 0.0001
+
+[sources.mock-suppliers.compliance]
+data_owner = "Demo Co (invented data)"
+authorization = "own_account"
+authorization_ref = "demo/mock-saas"
+tos_url = "http://127.0.0.1:8765/terms"
+tos_reviewed_on = 2026-10-26
+tos_review_max_age_days = 36500
+max_requests_per_minute = 600000
+retention_days = 7

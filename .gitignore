@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Credentials and pasted request captures: these must never be committed.
+.env
+.env.*
+!.env.example
+*curl*.txt
+*.cred
+*.token
+/credentials/
+/creds/
+browser-profile/
+.browser_profile/
+
+# Workspace artefacts: raw API snapshots are third-party data, not source code.
+/cache/
+/runs/
+state.sqlite*
+*.db
+*.db-journal
+*.sqlite
+/out/
+
+# Advisory locks of the flat-file sinks (a lock file is created next to the file it guards).
+*.jsonl.lock
+*.csv.lock
+
+# Local configuration (the checked-in template is catalog-sync.example.toml).
+/catalog-sync.toml
+
+# The Mock SaaS demo's pid file and log (`mock serve --detach --pid-file mock.pid`).
+mock.pid
+mock.log
+
+# Local agent worktrees and settings (Claude Code keeps them under .claude/).
+.claude/
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/

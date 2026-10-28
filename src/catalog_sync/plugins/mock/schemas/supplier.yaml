@@ -1,0 +1,18 @@
+# A supplier of a catalogue: who they are and how to reach and judge them.
+#
+# This is the second schema the tool ships, next to `material`. It has no pictures, no folders and
+# no money, which is what makes it a fair test of "records are whatever the schema says".
+version: 1
+entity: supplier
+schema_version: 1
+key: [source, source_id]
+
+fields:
+  name: {kind: text}
+  country: {kind: text}
+  rating: {kind: real}
+  lead_time_days: {kind: integer}
+  certifications: {kind: json, of: texts}
+  contact_email: {kind: text}
+  address: {kind: json, of: object}
+  listed_at: {kind: timestamp}

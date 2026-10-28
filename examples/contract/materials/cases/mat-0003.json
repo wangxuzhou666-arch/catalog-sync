@@ -1,0 +1,413 @@
+{
+  "run_1": {
+    "raw_list_row": {
+      "id": "mat-0003",
+      "type": "material",
+      "code": "MOCK-0003",
+      "name": "Demo Twill 03",
+      "price": 0,
+      "currency": "USD",
+      "thumbnail_url": "http://127.0.0.1:8765/media/thumb/mat-0003.png",
+      "updated_at": "2026-01-01T00:03:00Z"
+    },
+    "raw_detail_response": {
+      "http_status": 200,
+      "body": {
+        "state": true,
+        "data": {
+          "data": {
+            "id": "mat-0003",
+            "code": "MOCK-0003",
+            "name": "Demo Twill 03",
+            "price": "40.65",
+            "currency": "USD",
+            "weight": "160 gsm",
+            "width": null,
+            "composition": "95%CO/5%WO",
+            "supplier_id": "sup-002",
+            "supplier_name": "Sample Textiles Ltd.",
+            "thumbs": [],
+            "swatch_url": "http://127.0.0.1:8765/media/swatch/mat-0003.jpg"
+          }
+        }
+      }
+    },
+    "normalized_record": {
+      "source": "mock.materials",
+      "source_id": "mat-0003",
+      "code": "MOCK-0003",
+      "name": "Demo Twill 03",
+      "composition": [
+        {
+          "fiber": "Cotton",
+          "percent": 95.0,
+          "raw": "95%CO"
+        },
+        {
+          "fiber": "Wool",
+          "percent": 5.0,
+          "raw": "5%WO"
+        }
+      ],
+      "composition_raw": "95%CO/5%WO",
+      "weight_gsm": 160.0,
+      "width_cm": null,
+      "price": {
+        "amount": "40.65",
+        "currency": "USD"
+      },
+      "category": null,
+      "use_cases": [],
+      "tags": [],
+      "supplier": "Sample Textiles Ltd.",
+      "folder_paths": [
+        "Demo Woven/Twills"
+      ],
+      "images": [
+        {
+          "role": "thumb",
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0003.png",
+          "local_path": "assets/mat-0003+thumb.bin",
+          "sha256": "4201716ebd946bac6329b74990d0f2aa4974eb1cce9e02aca8a66e18813501c0",
+          "width": 96,
+          "height": 96,
+          "size_bytes": 3342
+        },
+        {
+          "role": "swatch",
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0003.jpg",
+          "local_path": "assets/mat-0003+swatch.bin",
+          "sha256": "e280e35afd81068b93c57d32f299593df4c6033b8eda6a0abda4d26192d0b1f8",
+          "width": 192,
+          "height": 192,
+          "size_bytes": 11942
+        }
+      ],
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-002"
+        }
+      },
+      "issues": [],
+      "source_version": "2026-01-01T00:03:00Z",
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0003",
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "normalized_at": "2026-10-27T09:02:00+00:00",
+      "schema_version": 1
+    },
+    "sqlite_row": {
+      "source": "mock.materials",
+      "source_id": "mat-0003",
+      "code": "MOCK-0003",
+      "composition": [
+        {
+          "fiber": "Cotton",
+          "percent": 95.0,
+          "raw": "95%CO"
+        },
+        {
+          "fiber": "Wool",
+          "percent": 5.0,
+          "raw": "5%WO"
+        }
+      ],
+      "composition_raw": "95%CO/5%WO",
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-002"
+        }
+      },
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "folder_paths": [
+        "Demo Woven/Twills"
+      ],
+      "images": [
+        {
+          "height": 96,
+          "local_path": "assets/mat-0003+thumb.bin",
+          "role": "thumb",
+          "sha256": "4201716ebd946bac6329b74990d0f2aa4974eb1cce9e02aca8a66e18813501c0",
+          "size_bytes": 3342,
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0003.png",
+          "width": 96
+        },
+        {
+          "height": 192,
+          "local_path": "assets/mat-0003+swatch.bin",
+          "role": "swatch",
+          "sha256": "e280e35afd81068b93c57d32f299593df4c6033b8eda6a0abda4d26192d0b1f8",
+          "size_bytes": 11942,
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0003.jpg",
+          "width": 192
+        }
+      ],
+      "issues": [],
+      "name": "Demo Twill 03",
+      "price": {
+        "amount": "40.65",
+        "currency": "USD"
+      },
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0003",
+      "schema_version": 1,
+      "source_version": "2026-01-01T00:03:00Z",
+      "supplier": "Sample Textiles Ltd.",
+      "weight_gsm": 160.0,
+      "width_cm": null
+    },
+    "platform_row": {
+      "source": "mock.materials",
+      "source_id": "mat-0003",
+      "code": "MOCK-0003",
+      "composition": [
+        {
+          "fiber": "Cotton",
+          "percent": 95.0,
+          "raw": "95%CO"
+        },
+        {
+          "fiber": "Wool",
+          "percent": 5.0,
+          "raw": "5%WO"
+        }
+      ],
+      "composition_raw": "95%CO/5%WO",
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-002"
+        }
+      },
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "folder_paths": [
+        "Demo Woven/Twills"
+      ],
+      "images": [
+        {
+          "height": 96,
+          "local_path": "assets/mat-0003+thumb.bin",
+          "role": "thumb",
+          "sha256": "4201716ebd946bac6329b74990d0f2aa4974eb1cce9e02aca8a66e18813501c0",
+          "size_bytes": 3342,
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0003.png",
+          "width": 96
+        },
+        {
+          "height": 192,
+          "local_path": "assets/mat-0003+swatch.bin",
+          "role": "swatch",
+          "sha256": "e280e35afd81068b93c57d32f299593df4c6033b8eda6a0abda4d26192d0b1f8",
+          "size_bytes": 11942,
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0003.jpg",
+          "width": 192
+        }
+      ],
+      "issues": [],
+      "name": "Demo Twill 03",
+      "price": {
+        "amount": "40.65",
+        "currency": "USD"
+      },
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0003",
+      "schema_version": 1,
+      "source_version": "2026-01-01T00:03:00Z",
+      "supplier": "Sample Textiles Ltd.",
+      "weight_gsm": 160.0,
+      "width_cm": null
+    }
+  },
+  "run_2": {
+    "raw_list_row": {
+      "id": "mat-0003",
+      "type": "material",
+      "code": "MOCK-0003",
+      "name": "Demo Twill 03",
+      "price": 0,
+      "currency": "USD",
+      "thumbnail_url": "http://127.0.0.1:8765/media/thumb/mat-0003.png",
+      "updated_at": "2026-01-01T00:03:00Z"
+    },
+    "raw_detail_response": null,
+    "normalized_record": {
+      "source": "mock.materials",
+      "source_id": "mat-0003",
+      "code": "MOCK-0003",
+      "name": "Demo Twill 03",
+      "composition": [
+        {
+          "fiber": "Cotton",
+          "percent": 95.0,
+          "raw": "95%CO"
+        },
+        {
+          "fiber": "Wool",
+          "percent": 5.0,
+          "raw": "5%WO"
+        }
+      ],
+      "composition_raw": "95%CO/5%WO",
+      "weight_gsm": 160.0,
+      "width_cm": null,
+      "price": {
+        "amount": "40.65",
+        "currency": "USD"
+      },
+      "category": null,
+      "use_cases": [],
+      "tags": [],
+      "supplier": "Sample Textiles Ltd.",
+      "folder_paths": [
+        "Demo Woven/Twills"
+      ],
+      "images": [
+        {
+          "role": "thumb",
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0003.png",
+          "local_path": "assets/mat-0003+thumb.bin",
+          "sha256": "4201716ebd946bac6329b74990d0f2aa4974eb1cce9e02aca8a66e18813501c0",
+          "width": 96,
+          "height": 96,
+          "size_bytes": 3342
+        },
+        {
+          "role": "swatch",
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0003.jpg",
+          "local_path": "assets/mat-0003+swatch.bin",
+          "sha256": "e280e35afd81068b93c57d32f299593df4c6033b8eda6a0abda4d26192d0b1f8",
+          "width": 192,
+          "height": 192,
+          "size_bytes": 11942
+        }
+      ],
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-002"
+        }
+      },
+      "issues": [],
+      "source_version": "2026-01-01T00:03:00Z",
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0003",
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "normalized_at": "2026-10-27T09:07:00+00:00",
+      "schema_version": 1
+    },
+    "sqlite_row": {
+      "source": "mock.materials",
+      "source_id": "mat-0003",
+      "code": "MOCK-0003",
+      "composition": [
+        {
+          "fiber": "Cotton",
+          "percent": 95.0,
+          "raw": "95%CO"
+        },
+        {
+          "fiber": "Wool",
+          "percent": 5.0,
+          "raw": "5%WO"
+        }
+      ],
+      "composition_raw": "95%CO/5%WO",
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-002"
+        }
+      },
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "folder_paths": [
+        "Demo Woven/Twills"
+      ],
+      "images": [
+        {
+          "height": 96,
+          "local_path": "assets/mat-0003+thumb.bin",
+          "role": "thumb",
+          "sha256": "4201716ebd946bac6329b74990d0f2aa4974eb1cce9e02aca8a66e18813501c0",
+          "size_bytes": 3342,
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0003.png",
+          "width": 96
+        },
+        {
+          "height": 192,
+          "local_path": "assets/mat-0003+swatch.bin",
+          "role": "swatch",
+          "sha256": "e280e35afd81068b93c57d32f299593df4c6033b8eda6a0abda4d26192d0b1f8",
+          "size_bytes": 11942,
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0003.jpg",
+          "width": 192
+        }
+      ],
+      "issues": [],
+      "name": "Demo Twill 03",
+      "price": {
+        "amount": "40.65",
+        "currency": "USD"
+      },
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0003",
+      "schema_version": 1,
+      "source_version": "2026-01-01T00:03:00Z",
+      "supplier": "Sample Textiles Ltd.",
+      "weight_gsm": 160.0,
+      "width_cm": null,
+      "ops_note": null
+    },
+    "platform_row": {
+      "source": "mock.materials",
+      "source_id": "mat-0003",
+      "code": "MOCK-0003",
+      "composition": [
+        {
+          "fiber": "Cotton",
+          "percent": 95.0,
+          "raw": "95%CO"
+        },
+        {
+          "fiber": "Wool",
+          "percent": 5.0,
+          "raw": "5%WO"
+        }
+      ],
+      "composition_raw": "95%CO/5%WO",
+      "extra": {
+        "mock": {
+          "supplier_id": "sup-002"
+        }
+      },
+      "fetched_at": "2026-10-27T09:01:00+00:00",
+      "folder_paths": [
+        "Demo Woven/Twills"
+      ],
+      "images": [
+        {
+          "height": 96,
+          "local_path": "assets/mat-0003+thumb.bin",
+          "role": "thumb",
+          "sha256": "4201716ebd946bac6329b74990d0f2aa4974eb1cce9e02aca8a66e18813501c0",
+          "size_bytes": 3342,
+          "source_url": "http://127.0.0.1:8765/media/thumb/mat-0003.png",
+          "width": 96
+        },
+        {
+          "height": 192,
+          "local_path": "assets/mat-0003+swatch.bin",
+          "role": "swatch",
+          "sha256": "e280e35afd81068b93c57d32f299593df4c6033b8eda6a0abda4d26192d0b1f8",
+          "size_bytes": 11942,
+          "source_url": "http://127.0.0.1:8765/media/swatch/mat-0003.jpg",
+          "width": 192
+        }
+      ],
+      "issues": [],
+      "name": "Demo Twill 03",
+      "price": {
+        "amount": "40.65",
+        "currency": "USD"
+      },
+      "raw_ref": "20261027T090100Z-xxxxxx:mat-0003",
+      "schema_version": 1,
+      "source_version": "2026-01-01T00:03:00Z",
+      "supplier": "Sample Textiles Ltd.",
+      "weight_gsm": 160.0,
+      "width_cm": null,
+      "ops_note": null
+    }
+  }
+}

@@ -1,0 +1,69 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "{{distribution}}"
+version = "0.1.0"
+description = "catalog-sync connector for {{title}}"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["catalog-sync>={{core_version}}"]
+
+# Entry-point values are callables `(options, *, base_dir) -> Source | CredentialKind`, or a
+# function returning the path of a schema file. catalog-sync finds the connector through these.
+[project.entry-points."catalog_sync.sources"]
+"{{source_name}}" = "{{package}}.source:{{class_prefix}}ItemsSource.from_options"
+
+[project.entry-points."catalog_sync.credentials"]
+{{name}} = "{{package}}.credentials:{{name}}_credential_kind"
+
+[project.entry-points."catalog_sync.connectors"]
+"{{source_name}}" = "{{package}}:item_connector"
+
+[project.entry-points."catalog_sync.schemas"]
+{{entity}} = "{{package}}:item_schema"
+
+{{uv_sources}}
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3",
+  "pytest-socket>=0.7",
+  "ruff>=0.8",
+  "mypy>=2.4.0",
+  "types-requests>=2.33.0.20261006",
+  "types-pyyaml>=6.0.12.20260906",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/{{package}}"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "."]
+# No test may touch the network: every fixture is synthetic and every transport is faked.
+addopts = "-ra --disable-socket --allow-unix-socket"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["src"]
+
+[[tool.mypy.overrides]]
+module = ["playwright", "playwright.*"]
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "BLE", "TRY", "SIM", "RUF", "C901", "UP", "S"]
+# TRY003: descriptive messages at the raise site are the point of fail-fast errors here.
+ignore = ["TRY003"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests assert, and compare against synthetic credentials whose variable names trip the S10x rules.
+"tests/**" = ["S101", "S105", "S106"]

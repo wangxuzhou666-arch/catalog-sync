@@ -1,0 +1,50 @@
+"""The calls the {{title}} connector makes, each answer checked before it is used.
+
+TODO(connector): this is the one module that knows the service's JSON. Take what it needs from the
+browser's network tab (docs/connector-guide.md in the catalog-sync repository shows how):
+
+* ``GET /api/v1/items``: one page of the list.
+* ``GET /api/v1/items/{id}``: one item's detail record.
+
+The answers are read as ``{"state": true, "data": ...}``, the detail wrapped twice (``data.data``),
+because that is a common shape and what tests/fake_service.py serves. A service that does not wrap
+its answers: read the block directly and drop ``require_state_ok`` and ``peel_data``. HTTP 200 does
+not mean success on every service, so check whatever the service uses to say it failed.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Mapping
+from urllib.parse import quote
+
+from catalog_sync.credentials.base import Credential
+from catalog_sync.envelope import peel_data, require_state_ok
+from catalog_sync.http import HttpClient
+from catalog_sync.models import JsonObject
+{{api_imports}}
+
+LIST_PATH = "/api/v1/items"  # TODO(connector): the list endpoint
+DETAIL_PATH = "/api/v1/items/{item_id}"  # TODO(connector): the detail endpoint
+
+
+def api_headers(credential: Credential) -> Mapping[str, str]:
+    """What every call carries: the tool's own user agent and the credential's headers."""
+    return {"accept": "application/json", "user-agent": USER_AGENT, **credential.headers}
+
+
+class {{class_prefix}}Api:
+    def __init__(self, client: HttpClient, *, base_url: str, page_size: int) -> None:
+        self._client = client
+        self._base_url = base_url
+        self._page_size = page_size
+
+{{api_list}}
+
+    def item_detail(self, item_id: str) -> JsonObject:
+        path = DETAIL_PATH.format(item_id=quote(item_id, safe=""))
+        payload = self._client.get_json(f"{self._base_url}{path}")
+        with shape_context(f"detail of item {item_id}"):
+            return parse_detail(payload)
+
+
+{{api_parse}}

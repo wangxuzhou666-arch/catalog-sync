@@ -1,0 +1,49 @@
+#@ api_imports
+from catalog_sync.sdk import USER_AGENT, OffsetPage, offset_page, parse_detail, shape_context
+
+#@ api_list
+    def list_items(self, offset: int, limit: int) -> OffsetPage:
+        payload = self._client.get_json(
+            f"{self._base_url}{LIST_PATH}", params={"offset": offset, "limit": limit}
+        )
+        with shape_context(f"{LIST_PATH} at offset {offset}"):
+            return parse_list_page(payload)
+
+    def first_page(self) -> OffsetPage:
+        """One cheap call that needs the credential: what `login` checks a new credential with."""
+        return self.list_items(0, self._page_size)
+
+#@ api_parse
+def parse_list_page(payload: Mapping[str, object]) -> OffsetPage:
+    """TODO(connector): where the rows and the total (if the service says) sit in the answer."""
+    require_state_ok(payload)
+    return offset_page(peel_data(payload, 1), where="data", rows_key="items", total_key="total")
+
+#@ source_imports
+from catalog_sync.sdk import (
+    USER_AGENT,
+    Connection,
+    PictureAssets,
+    https_only,
+    item_scoped,
+    walk_offset_pages,
+)
+
+#@ source_pages
+        pages = walk_offset_pages(
+            self._api().list_items,
+            state,
+            key=FRONTIER_KEY,
+            limit=self._settings.page_size,
+            max_pages=self._settings.max_pages,
+            what="items",
+        )
+
+#@ source_total
+page.total
+
+#@ fake_list
+    def _list(self, request: RecordedRequest) -> FakeResponse:
+        offset, limit = int(request.query["offset"]), int(request.query["limit"])
+        rows = [list_row(item) for item in self.items[offset : offset + limit]]
+        return FakeResponse.json(envelope({"items": rows, "total": len(self.items)}))

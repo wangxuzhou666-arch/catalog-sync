@@ -1,0 +1,26 @@
+#@ fake_constants
+AUTH_HEADER = "cookie"
+AUTH_VALUE = "session=fake-session-0001"
+LOGIN_PATH = "/api/login"
+ACCOUNT = {"username": "demo", "password": "demo-password"}
+
+#@ fake_login
+        if request.path == LOGIN_PATH:
+            return self._login(request)
+#@ fake_login_method
+    def _login(self, request: RecordedRequest) -> FakeResponse:
+        if request.json_body() != ACCOUNT:
+            return FakeResponse(401)
+        cookie = f"{AUTH_VALUE}; Path=/; HttpOnly"
+        return FakeResponse.json(envelope({}), headers={"Set-Cookie": cookie})
+
+#@ toml_credential
+# base_url = "https://{{host}}"     # only if the web app lives somewhere else than the API
+
+#@ readme_auth
+A session cookie: `catalog-sync login {{name}} --form` posts `{{env_prefix}}_USER` /
+`{{env_prefix}}_PASSWORD` (environment variables; the tool never reads a `.env` file) to the login
+address in `credentials.py` and keeps the one cookie the answer sets (named in `credentials.py`), not
+the whole jar. Every request then carries it as a `Cookie` header. A pasted cURL command cannot be
+the source of a cookie: the parser drops cookies on purpose. A session cookie usually has no expiry
+the tool can read, so `auth status` reports `unknown`; log in again when the service says 401.

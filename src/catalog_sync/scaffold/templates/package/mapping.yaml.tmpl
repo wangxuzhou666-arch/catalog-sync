@@ -1,0 +1,31 @@
+# Mapping for the {{title}} items, onto the `{{entity}}` schema (../schemas/{{entity}}.yaml).
+#
+# TODO(connector): one rule per field of the schema, saying where its value comes from.
+# `list.<path>` reads the listing row exactly as the service returned it, `detail.<path>` the
+# detail record. The two are read side by side and never merged: neither is usually a superset of
+# the other, and an empty value in one must not wipe a value in the other. The first source that
+# has a value wins. A value that cannot be understood becomes null plus a note in `issues`, never
+# a guess. Add `sensitive: true` to a field a sink should drop unless told otherwise.
+version: 1
+source: {{source_name}}
+schema: ../schemas/{{entity}}.yaml
+
+fields:
+  name:
+    from: [detail.name, list.name]
+
+  status:
+    from: [detail.status]
+
+  amount:
+    from: [detail.amount]
+
+  updated_at:
+    from: [list.updated_at]
+
+  # Where each picture comes from; keep these paths the same as _PICTURES in source.py.
+  images:
+    roles:
+      thumb:
+        - list.image_url
+    on_null: keep_existing              # a failed download must not blank loaded pictures

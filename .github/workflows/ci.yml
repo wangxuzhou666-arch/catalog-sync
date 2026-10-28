@@ -1,0 +1,214 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  UV_FROZEN: "1" # `uv run` must never re-resolve: the committed uv.lock is what CI tests
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      # The gate self-tests run the real gitleaks binary; CI must never skip them.
+      - name: Install gitleaks
+        run: |
+          curl -sSfL -o gitleaks.tar.gz \
+            https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  gitleaks.tar.gz" | sha256sum -c -
+          tar -xzf gitleaks.tar.gz gitleaks
+          sudo install -m 0755 gitleaks /usr/local/bin/gitleaks
+      - run: uv sync --frozen --python ${{ matrix.python-version }}
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy --strict src
+      - run: uv run python tools/check_nesting.py src tools
+      - run: uv run pytest -q
+      - name: Replay smoke test
+        run: |
+          uv run catalog-sync --workspace "$RUNNER_TEMP/ws" pull replay --option path=examples/synthetic
+          uv run catalog-sync --workspace "$RUNNER_TEMP/ws" runs list
+      # The demos in both READMEs (the Mock SaaS demo, which also loads into the reference platform
+      # over HTTP; the offline replay; and a generated connector running its own tests), run exactly as
+      # written in a scratch copy of the repository (tools/run_readme.py), so neither document can drift
+      # from the tool or from the other. The demo starts the Mock SaaS on 127.0.0.1:8765 and the
+      # reference platform on 127.0.0.1:8780, and stops them again. The Chinese README is run on its
+      # own, so that a block that drifted only there fails here too. The sinks of the demo write to
+      # {workspace}/out, which run_readme.py puts inside the scratch copy (.catalog-sync-home).
+      - name: README demos (English)
+        run: >-
+          uv run python tools/run_readme.py README.md --scratch "$RUNNER_TEMP/readme-en"
+          --expect .catalog-sync-home/out/mock.db --expect out/materials.jsonl --expect out/platform.db
+          --expect .catalog-sync-home/out/catalog.db --expect .catalog-sync-home/out/catalog.jsonl
+          --expect .catalog-sync-home/out/catalog.csv
+          --expect out/connectors/acme/pyproject.toml
+      - name: README demos (Chinese)
+        run: >-
+          uv run python tools/run_readme.py README.zh-CN.md --scratch "$RUNNER_TEMP/readme-zh"
+          --expect .catalog-sync-home/out/mock.db --expect out/materials.jsonl --expect out/platform.db
+          --expect .catalog-sync-home/out/catalog.db --expect .catalog-sync-home/out/catalog.jsonl
+          --expect .catalog-sync-home/out/catalog.csv
+          --expect out/connectors/acme/pyproject.toml
+
+  # Every connector package under connectors/ is a project of its own, with its own lock file: it
+  # syncs, tests and lints against the catalog-sync of this checkout. The job above never installs
+  # one (the core suite must pass without any), and this one names none: a new directory is picked up.
+  connectors:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      # A connector may test a repository gate with the real binary; install it as the test job does.
+      - name: Install gitleaks
+        run: |
+          curl -sSfL -o gitleaks.tar.gz \
+            https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  gitleaks.tar.gz" | sha256sum -c -
+          tar -xzf gitleaks.tar.gz gitleaks
+          sudo install -m 0755 gitleaks /usr/local/bin/gitleaks
+      - name: Test and lint every connector package
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          connector_dirs=(connectors/*/)
+          if [ "${#connector_dirs[@]}" -eq 0 ]; then
+            echo "::notice::No separately installed connector packages in this checkout; core Mock and scaffold tests run in the test job."
+          fi
+          for dir in "${connector_dirs[@]}"; do
+            echo "::group::$dir"
+            (
+              cd "$dir"
+              uv sync --frozen --python ${{ matrix.python-version }}
+              uv run pytest -q
+              uv run ruff check .
+              uv run ruff format --check .
+              uv run mypy --strict src
+            )
+            echo "::endgroup::"
+          done
+
+  # The Postgres sink against a real server. The test job skips these tests (no server, no
+  # driver); this job exists to run them, so a skip here is a failure (CATALOG_SYNC_REQUIRE_POSTGRES).
+  postgres:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres # a throw-away service container, reachable only from this job
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      CATALOG_SYNC_TEST_POSTGRES_DSN: postgresql://postgres:postgres@127.0.0.1:5432/postgres
+      CATALOG_SYNC_REQUIRE_POSTGRES: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - run: uv sync --frozen --extra postgres --python ${{ matrix.python-version }}
+      - run: uv run pytest -q -m postgres
+
+  # The clean-install acceptance of docs/acceptance.md: build the wheel and the sdist, install each
+  # into a fresh virtual environment and run every scenario against the installed copy, Mock source
+  # and reference platform included, with a real Postgres. It names no connector and talks only to
+  # 127.0.0.1 (uv fetches packages while building and installing). The report goes to the job summary.
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres # a throw-away service container, reachable only from this job
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      ACCEPTANCE_POSTGRES_DSN: postgresql://postgres:postgres@127.0.0.1:5432/postgres
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - run: uv sync --frozen --all-extras --python 3.12
+      - name: Run every scenario against the installed package
+        run: uv run python tools/acceptance.py --out "$RUNNER_TEMP/acceptance"
+      - name: Report
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/acceptance/acceptance-report.md" ]; then
+            cat "$RUNNER_TEMP/acceptance/acceptance-report.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  # The container stack of docs/deploy.md, end to end: build the image, start the mocks, Postgres
+  # and the scheduler, log in with the one-shot, wait for one successful cycle, and count the rows
+  # that reached both sinks. Everything it needs is generated here and thrown away with the runner.
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      COMPOSE: docker compose -f deploy/compose.yaml
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Write throw-away secrets
+        run: |
+          umask 077
+          {
+            echo "MOCK_SAAS_USER=smoke"
+            for name in MOCK_SAAS_PASSWORD PLATFORM_TOKEN POSTGRES_PASSWORD CATALOG_SYNC_DB_PASSWORD; do
+              echo "$name=$(openssl rand -hex 16)"
+            done
+          } > deploy/.env
+      - name: Build the image
+        run: $COMPOSE build
+      - name: Start the source, the platform and the database
+        run: $COMPOSE up -d --wait --wait-timeout 120 mock-saas mock-platform postgres
+      - name: Log in with the one-shot container
+        run: $COMPOSE run --rm login
+      - name: Start the scheduler and wait for one successful cycle
+        run: |
+          $COMPOSE up -d
+          for attempt in $(seq 1 60); do
+            if $COMPOSE exec -T catalog-sync catalog-sync health; then exit 0; fi
+            sleep 3
+          done
+          echo "no scheduled cycle finished successfully within three minutes" >&2
+          exit 1
+      - name: Rows reached Postgres and the platform
+        run: |
+          warehouse=$($COMPOSE exec -T postgres psql -U postgres -d catalog -tAc "select count(*) from catalog.materials")
+          platform=$($COMPOSE exec -T mock-platform python -c "import sqlite3; print(sqlite3.connect('/data/platform.db').execute('select count(*) from material').fetchone()[0])")
+          echo "rows in Postgres: $warehouse, rows in the platform: $platform"
+          test "$warehouse" -gt 0
+          test "$warehouse" = "$platform"
+      - name: Show the logs of the stack
+        if: failure()
+        run: $COMPOSE logs --no-color --tail 200
+      - name: Tear down, volumes included
+        if: always()
+        run: $COMPOSE --profile tools down -v
