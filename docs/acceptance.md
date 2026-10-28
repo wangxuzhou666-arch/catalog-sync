@@ -198,12 +198,12 @@ They run after the scenarios, on what the steps built, and are registered the sa
 
 What the package is built and tested for, so that a record of a run can be read against it.
 
-- **Python.** `requires-python >= 3.11`. What the harness actually ran: Python 3.13, both as the
-  interpreter of the harness and of the fresh environments, and only that. The CI matrix is
-  configured for 3.11 to 3.13 (the test job; the acceptance job uses 3.12), but it has not run,
-  because this repository has no remote yet.
-- **Operating systems run through this harness.** macOS on Apple silicon only. No other OS has been
-  run through it.
+- **Python.** `requires-python >= 3.11`. The harness has passed on Python 3.13 locally and
+  Python 3.12 in GitHub CI. The test matrix targets Python 3.11 to 3.13; its result belongs
+  to the exact commit tested, not to every revision of the package.
+- **Operating systems run through this harness.** macOS on Apple silicon and Linux on GitHub's
+  Ubuntu runner. The first Linux clean-install run passed at commit `20bb3c3`
+  ([CI run](https://github.com/wangxuzhou666-arch/catalog-sync/actions/runs/40611665918)).
 - **Entities.** `material` and `supplier`, both with the built-in schemas; a connector can declare
   its own schema.
 - **Sinks.** `jsonl`, `csv`, `sqlite`, `postgres` (needs the `postgres` extra) and `http` (your

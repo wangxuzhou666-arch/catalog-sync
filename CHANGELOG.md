@@ -54,8 +54,9 @@ From [docs/data-contract.md](docs/data-contract.md), section 14, as they stand i
 
 Outside the data contract:
 
-- The acceptance harness has run on Python 3.13 and on macOS (Apple silicon) only. The CI matrix
-  names Python 3.11 to 3.13, but it has not run: the repository has no remote yet.
+- The clean-install acceptance harness has passed on macOS (Apple silicon, Python 3.13)
+  and in GitHub CI on Linux (Python 3.12). The test matrix targets Python 3.11 to 3.13;
+  consult the CI result for the exact commit being used.
 - A request signed by JavaScript on the page, a site with no JSON behind it, a CAPTCHA and a second
   factor are not supported. A person does the last two.
 
@@ -65,3 +66,4 @@ The public repository and release package contain the Mock SaaS and `replay`, an
 for a real service. Real-service connectors are maintained as separate packages. They are not
 part of this repository, its wheel, sdist or image; the connector SDK and scaffold remain available
 for users to build and test their own adapters.
+Real-service connectors are not released here; this checkout has no `connectors/` directory.
