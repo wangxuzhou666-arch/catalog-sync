@@ -49,6 +49,8 @@ def test_the_shipped_example_config_is_accepted_by_the_mock_plugin() -> None:
 DOCS = [
     REPO_ROOT / "README.md",
     REPO_ROOT / "README.zh-CN.md",
+    REPO_ROOT / "docs" / "README.md",
+    REPO_ROOT / "docs" / "README.zh-CN.md",
     REPO_ROOT / "CONTRIBUTING.md",
     REPO_ROOT / "SECURITY.md",
     REPO_ROOT / "docs" / "compliance.md",
@@ -57,8 +59,8 @@ DOCS = [
     REPO_ROOT / "docs" / "platform-contract.md",
     REPO_ROOT / "docs" / "deploy.md",
 ]
-README = REPO_ROOT / "README.md"
-README_ZH = REPO_ROOT / "README.zh-CN.md"
+README = REPO_ROOT / "docs" / "README.md"
+README_ZH = REPO_ROOT / "docs" / "README.zh-CN.md"
 POSITIONING = "Bring data from the services you use into the platform you build."
 LINK = re.compile(r"\]\((?!https?:|mailto:|#)([^)#\s]+)(?:#[^)]*)?\)")
 

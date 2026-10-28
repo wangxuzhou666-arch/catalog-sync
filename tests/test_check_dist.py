@@ -197,10 +197,22 @@ def test_near_misses_of_the_public_patterns_pass(dists: Dists, text: str) -> Non
     assert dists.check(sdist={"docs/n.txt": text}).findings == []
 
 
-def test_the_chinese_readme_may_hold_cjk_and_no_other_file_may(dists: Dists) -> None:
+def test_only_the_two_reviewed_chinese_documents_may_hold_cjk(dists: Dists) -> None:
     assert dists.check().findings == []  # README.zh-CN.md is in the good sdist
-    checked = dists.check(sdist={"docs/README.zh-CN.md": CJK})
+    assert dists.check(sdist={"docs/README.zh-CN.md": CJK}).findings == []
+    checked = dists.check(sdist={"docs/private-notes.md": CJK})
     assert [f.rule for f in checked.findings] == ["forbidden-term"]
+
+
+def test_chinese_document_allowlist_does_not_exempt_private_terms(
+    dists: Dists, tmp_path: Path
+) -> None:
+    checked = dists.check(
+        sdist={"docs/README.zh-CN.md": f"{CJK} {TERM}"},
+        terms=terms_file(tmp_path, TERM),
+    )
+    assert [(f.rule, f.detail) for f in checked.findings] == [("forbidden-term", "private term 1")]
+    assert TERM not in report(checked)
 
 
 # --- host-path ----------------------------------------------------------------------------------

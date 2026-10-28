@@ -20,7 +20,7 @@ and the reference HTTP receiver inside an isolated container with external netwo
 The HTML report compares source values, normalized records and imported results. Both destinations
 must pass identity, field and repeat-import checks. The launcher removes the temporary container and
 its data volume on exit; only the report and cached image remain. See the
-[README demo](../README.md#try-the-synthetic-demo) for requirements and cleanup.
+[full demo guide](README.md#try-the-synthetic-demo) for requirements and cleanup.
 
 This trial needs neither a real service account nor the Compose configuration below. The Compose
 stack is the separate example for Postgres and scheduled execution.

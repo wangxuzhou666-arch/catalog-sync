@@ -39,23 +39,23 @@ jobs:
         run: |
           uv run catalog-sync --workspace "$RUNNER_TEMP/ws" pull replay --option path=examples/synthetic
           uv run catalog-sync --workspace "$RUNNER_TEMP/ws" runs list
-      # The demos in both READMEs (the Mock SaaS demo, which also loads into the reference platform
+      # The demos in both full user guides (the Mock SaaS demo, which also loads into the reference platform
       # over HTTP; the offline replay; and a generated connector running its own tests), run exactly as
       # written in a scratch copy of the repository (tools/run_readme.py), so neither document can drift
       # from the tool or from the other. The demo starts the Mock SaaS on 127.0.0.1:8765 and the
       # reference platform on 127.0.0.1:8780, and stops them again. The Chinese README is run on its
       # own, so that a block that drifted only there fails here too. The sinks of the demo write to
       # {workspace}/out, which run_readme.py puts inside the scratch copy (.catalog-sync-home).
-      - name: README demos (English)
+      - name: User guide demos (English)
         run: >-
-          uv run python tools/run_readme.py README.md --scratch "$RUNNER_TEMP/readme-en"
+          uv run python tools/run_readme.py docs/README.md --scratch "$RUNNER_TEMP/readme-en"
           --expect .catalog-sync-home/out/mock.db --expect out/materials.jsonl --expect out/platform.db
           --expect .catalog-sync-home/out/catalog.db --expect .catalog-sync-home/out/catalog.jsonl
           --expect .catalog-sync-home/out/catalog.csv
           --expect out/connectors/acme/pyproject.toml
-      - name: README demos (Chinese)
+      - name: User guide demos (Chinese)
         run: >-
-          uv run python tools/run_readme.py README.zh-CN.md --scratch "$RUNNER_TEMP/readme-zh"
+          uv run python tools/run_readme.py docs/README.zh-CN.md --scratch "$RUNNER_TEMP/readme-zh"
           --expect .catalog-sync-home/out/mock.db --expect out/materials.jsonl --expect out/platform.db
           --expect .catalog-sync-home/out/catalog.db --expect .catalog-sync-home/out/catalog.jsonl
           --expect .catalog-sync-home/out/catalog.csv

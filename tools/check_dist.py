@@ -67,8 +67,10 @@ _SAFE_MATCH: Mapping[str, re.Pattern[str]] = {
         r"(?:@users\.noreply\.github\.com|@example\.(?:com|org|net)|^noreply@anthropic\.com)$"
     ),
 }
-# Files a public pattern does not apply to (the Chinese README is the one sanctioned CJK file).
-_PATTERN_EXEMPT: Mapping[str, frozenset[str]] = {"cjk-text": frozenset({"README.zh-CN.md"})}
+# The two reviewed Chinese documents; private-term matching still applies to both.
+_PATTERN_EXEMPT: Mapping[str, frozenset[str]] = {
+    "cjk-text": frozenset({"README.zh-CN.md", "docs/README.zh-CN.md"})
+}
 
 # Directory names that must not appear at any depth.
 NEVER_SHIP_DIRS: Mapping[str, str] = {

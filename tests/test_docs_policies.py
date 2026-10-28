@@ -18,8 +18,8 @@ from catalog_sync.http import _MAX_REDIRECTS
 from catalog_sync.scaffold import ConnectorSpec
 from tests.conftest import REPO_ROOT
 
-README = REPO_ROOT / "README.md"
-README_ZH = REPO_ROOT / "README.zh-CN.md"
+README = REPO_ROOT / "docs" / "README.md"
+README_ZH = REPO_ROOT / "docs" / "README.zh-CN.md"
 DEPLOY = REPO_ROOT / "docs" / "deploy.md"
 GUIDE = REPO_ROOT / "docs" / "connector-guide.md"
 COMPLIANCE = REPO_ROOT / "docs" / "compliance.md"

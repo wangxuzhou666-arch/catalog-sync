@@ -156,7 +156,7 @@ explained before the tag is made.
 
 | Row | What it looks at | Fails when |
 |---|---|---|
-| `dist-check` | The wheel and the sdist the run built, with `tools/check_dist.py`. | A private term or a public pattern (a personal address, CJK text outside `README.zh-CN.md`, a token, a private key) is in a name or a file; a `/Users/<name>` or `/home/<name>` path is anywhere; an entry point or a package is not registered by the root `pyproject.toml`; a file from the list below is present; `LICENSE`, `README.md` (sdist) or the licence metadata (wheel) is missing. |
+| `dist-check` | The wheel and the sdist the run built, with `tools/check_dist.py`. | A private term or a public pattern (a personal address, CJK text outside `README.zh-CN.md` and `docs/README.zh-CN.md`, a token, a private key) is in a name or a file; a `/Users/<name>` or `/home/<name>` path is anywhere; an entry point or a package is not registered by the root `pyproject.toml`; a file from the list below is present; `LICENSE`, `README.md` (sdist) or the licence metadata (wheel) is missing. |
 | `licenses` | Every distribution installed in the clean wheel environment (with the `postgres` extra when a DSN was given), as a table in the report. | A licence is copyleft (GPL, AGPL, LGPL, SSPL, EUPL, MPL) and not in the reviewed list, or a distribution states none. |
 | `image` | The `Dockerfile` built from an export of HEAD, then run with no network. | A distribution named `catalog-sync*` other than the core is installed; an entry point is registered that the root `pyproject.toml` does not register; the user is root; a file under `/app` is on the list below; `--version` is not the source's. The tag it built is removed afterwards. |
 

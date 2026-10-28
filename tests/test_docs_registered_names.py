@@ -18,7 +18,7 @@ from tests.conftest import REPO_ROOT
 PYPROJECT = tomllib.loads((REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8"))
 ENTRY_POINTS = PYPROJECT["project"]["entry-points"]
 EXAMPLE_TEXT = (REPO_ROOT / "catalog-sync.example.toml").read_text(encoding="utf-8")
-README_TEXT = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+README_TEXT = (REPO_ROOT / "docs" / "README.md").read_text(encoding="utf-8")
 
 CODE_BLOCK = re.compile(r"(?s)```(?:console|toml|yaml|python|)\n(.*?)```")
 PLUGIN_LINE = re.compile(r'(?m)^\s*plugin\s*=\s*"([^"]+)"')

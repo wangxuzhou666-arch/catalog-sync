@@ -17,8 +17,8 @@ from catalog_sync import cli
 from run_readme import NoRunnableBlock, extract_commands, main
 from tests.conftest import REPO_ROOT
 
-README = REPO_ROOT / "README.md"
-README_ZH = REPO_ROOT / "README.zh-CN.md"
+README = REPO_ROOT / "docs" / "README.md"
+README_ZH = REPO_ROOT / "docs" / "README.zh-CN.md"
 
 
 def readme(text: str) -> str:
