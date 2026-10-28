@@ -175,6 +175,10 @@ jobs:
       COMPOSE: docker compose -f deploy/compose.yaml
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: One-command synthetic trial
+        env:
+          DEMO_OPEN_REPORT: "0"
+        run: DEMO_OUTPUT_DIR="$RUNNER_TEMP/one-click-demo" sh tools/demo.sh
       - name: Write throw-away secrets
         run: |
           umask 077

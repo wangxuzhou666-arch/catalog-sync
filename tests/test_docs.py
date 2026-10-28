@@ -59,10 +59,7 @@ DOCS = [
 ]
 README = REPO_ROOT / "README.md"
 README_ZH = REPO_ROOT / "README.zh-CN.md"
-POSITIONING = (
-    "A compliance-first pipeline to integrate your company's data from the SaaS tools it uses "
-    "into your own platform: collect → clean → normalize → load."
-)
+POSITIONING = "Bring data from the services you use into the platform you build."
 LINK = re.compile(r"\]\((?!https?:|mailto:|#)([^)#\s]+)(?:#[^)]*)?\)")
 
 
@@ -79,8 +76,8 @@ def test_the_readme_states_the_positioning_and_has_the_promised_sections() -> No
     for wanted in (
         "Why",
         "How it works",
-        "Quick start",
-        "Try it in 60 seconds",
+        "Connect your own service",
+        "Try the synthetic demo",
         "Connectors",
         "Configuration reference",
         "Command reference",

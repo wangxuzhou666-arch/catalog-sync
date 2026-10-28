@@ -12,6 +12,19 @@ that you can run in two minutes against the built-in mocks and then point at you
 | [`deploy/postgres-init.sh`](../deploy/postgres-init.sh) | Creates the restricted database role catalog-sync loads as. |
 | [`Dockerfile`](../Dockerfile) | The image: non-root, no browser, no secret, bases pinned by digest. |
 
+## One-command synthetic trial
+
+For a first trial with Docker already running, use `sh tools/demo.sh` from the repository root.
+It builds the existing Dockerfile, then runs the installed package with a synthetic source, SQLite
+and the reference HTTP receiver inside an isolated container with external networking disabled.
+The HTML report compares source values, normalized records and imported results. Both destinations
+must pass identity, field and repeat-import checks. The launcher removes the temporary container and
+its data volume on exit; only the report and cached image remain. See the
+[README demo](../README.md#try-the-synthetic-demo) for requirements and cleanup.
+
+This trial needs neither a real service account nor the Compose configuration below. The Compose
+stack is the separate example for Postgres and scheduled execution.
+
 ## The local stack, with the mocks
 
 You need Docker with Compose v2. Run everything from the root of the repository.

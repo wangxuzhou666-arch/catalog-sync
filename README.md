@@ -2,88 +2,252 @@
 
 English | [Chinese (zh-CN)](README.zh-CN.md)
 
-**Bring authorized business data into your own platform: collect → clean → normalize → load.**
+**Bring data from the services you use into the platform you build.**
 
-catalog-sync is a Python framework for platform and data teams. Adapt a source connector for a
-SaaS API or an internal enterprise data service, define the field mappings, and load records into
-a database or a business application implementing the documented receiver contract. Run the
-pipeline from the command line or in Docker.
+Collect authorized external data, clean and map its fields, and load the results into your own
+database or business application. Run the same workflow again when the source changes.
 
-Resume interrupted pulls, rerun cleaning rules offline from retained raw data, and update the
-fields owned by the integration while preserving the platform's other fields and child records.
-Each run records its progress and failures. The framework requires an access declaration before
-contacting a service; the user remains responsible for obtaining permission.
+Built for technical teams connecting SaaS or enterprise data services to their own platforms.
+Start with product/material and supplier records. With Docker running, one command collects, cleans
+and imports the synthetic data, then opens a report. Adapt the source and destination after trying it.
 
-> Release candidate: the API may change. This repository includes the framework, a synthetic
-> service and offline replay. Real-service connectors are separate packages supplied by users.
-> Start with the built-in Mock SaaS ([Try it](#try-it-in-60-seconds)) to evaluate the complete
-> pipeline without a real account. Tested scope and evidence: [acceptance](docs/acceptance.md).
+**[Try the demo](#try-the-synthetic-demo)** · [See one record end to end](#one-record-end-to-end) ·
+[Connect your own service](#connect-your-own-service) · [Run in Docker](docs/deploy.md)
 
-- [Why](#why) · [How it works](#how-it-works) · [Quick start](#quick-start) · [Try it in 60 seconds](#try-it-in-60-seconds) · [Connectors](#connectors)
-- [Configuration reference](#configuration-reference) · [Command reference](#command-reference)
-- [Writing your own source or sink](#writing-your-own-source-or-sink) · [Writing a connector](docs/connector-guide.md)
-- [Responsible use](#responsible-use) · [Security](#security) · [Development](#development)
+> **v0.1.0rc1 · release candidate.** Includes the framework, synthetic source, offline replay and
+> a reference HTTP receiver. Real services need an installed or custom Python connector.
+> Tested scope and limitations: [acceptance](docs/acceptance.md).
 
 ## Why
 
-- **The official export is missing or incomplete.** Many SaaS products show you your data in a web
-  app and offer nothing to take it out, or an export that leaves out the fields you need. The app
-  itself talks to an API; with your own login you can read what you can already see.
-- **The fields do not match.** What the service calls a field, how it writes a weight, a width, a
-  price or a fibre composition, and the codes it uses, are not what your platform stores. Cleaning is
-  explicit here: one mapping rule per field, code tables per source, and a value that cannot be
-  understood becomes `null` plus a note in `issues`, never a guess.
-- **Integration has to be auditable.** Someone will ask who allowed this, which terms were read, how
-  often the service was called, what was copied, and when it should be deleted. The answers should
-  be in the tool's own records, not in someone's memory.
+Access to an external service is only the beginning. Your application needs consistent records,
+repeatable imports and clear rules for updating data it already owns.
 
-## How it works
+| When your team needs to… | catalog-sync provides… | What that means for the workflow |
+|---|---|---|
+| Turn external fields into application records | Explicit field mappings, unit parsing and source-specific code tables | Keep transformation rules in a repeatable configuration. |
+| Recover from an interrupted collection | Saved progress and resumable pulls | Continue from completed work. |
+| Change a mapping after collection | Retained raw responses and offline normalization | Reprocess data without fetching it again. |
+| Import another batch into an existing platform | Record identity, update policies and owned-field boundaries | Repeat imports while preserving application-owned fields. |
+| Investigate an incomplete run | Item failures, parsing issues and audit records | Identify what needs attention before the next run. |
+
+The complete path:
 
 ```
- SaaS tool                  catalog-sync                                        your platform
- ---------    +-----------------------------------------------------+    -------------------
-              |  compliance gate: declaration valid? rate ceiling?  |
-   HTTP  ---> |  credential fresh?  (all checked before any call)   |
-              |                                                     |
-              |  collect         clean + normalize          load    |
-              |  pull  ------>  raw cache  ------>  mapping  ---> sinks ---> SQLite, Postgres,
-              |  (resumable)    (kept, offline)     + code tables   |        JSONL, CSV, HTTP, or yours
-              |                                                     |
-              |  audit log: one line per login, pull, normalize,    |
-              |  load, run and purge. Counts and ids, never content.|
-              +-----------------------------------------------------+
+Authorized SaaS / enterprise service
+               ↓
+        Source connector
+               ↓
+           Raw cache  ← replay when mappings change
+               ↓
+     Clean · map · handle empty values
+               ↓
+       Normalized records
+               ↓
+   Your database / application receiver
 ```
 
-1. **Collect** (`pull`). A *source* plugin lists the items, fetches each one's detail record and its
-   pictures, and the raw responses are stored under the workspace, one directory per run, with a
-   checksum for every file. A killed or failed pull is continued with `--resume`; a second pull only
-   fetches what changed. HTTP is paced (a declared ceiling per minute, enforced as a sliding window),
-   retried with backoff on 5xx and 429, and never retried on other 4xx.
-2. **Clean and normalize** (`normalize`). Reads only the cache, so it works offline and a changed
-   mapping can be tried again at once. A YAML *mapping* states, for each field of the record, which
-   raw values feed it (listing row and detail record are read side by side and never merged), how to
-   parse them, and whether it is `sensitive`. Code tables are per source and never merged.
-3. **Load** (`load`). A *sink* writes the records (a file, a database, or your platform over HTTP). Only the fields the mapping owns are written;
-   `NULL` is written as `NULL` unless the field is marked `keep_existing`; rows are never deleted
-   (rows the source no longer returns are reported); a backup is taken first; `--dry-run` shows
-   what would change and writes nothing. SQL sinks use `INSERT ... ON CONFLICT DO UPDATE`, so child
-   rows that cascade on delete survive a refresh.
-4. **Around all of it**: the **compliance gate** refuses to start a pull, or a login that makes a
-   request, without a valid declaration, and the **audit log** records what was done.
+You configure the source, field rules and destination. The framework carries the records through
+that path; the [data contract](docs/data-contract.md) defines empty values, failures and update behavior.
 
-The output contract (entities and schema versions, the normalized file, the `(source, source_id)` key,
-provenance, field tables, empty-value rules, issue codes, sensitive policy, failure handling, owned
-fields and `keep_existing`, backups and audit) is in [docs/data-contract.md](docs/data-contract.md). A
-generated side-by-side run for materials and suppliers, from the Mock SaaS through SQLite and the
-reference platform, is in [examples/contract/](examples/contract/) and is checked against the code by a
-test.
+## One record, end to end
 
-## Quick start
+This is a **synthetic example**, taken from the checked [contract fixtures](examples/contract/materials/cases/mat-0002.json).
+The same source identity follows the record from the service to the receiver.
 
-To bring a company's data from a SaaS tool into its own platform, catalog-sync needs three things from
-you and nothing else: the **address of the platform** (or a database) the data goes to, a **login** for
-the tool it comes from, and the **authorization** to read that data. `catalog-sync init` asks for them
-one step at a time, checks each one works, and writes the config file:
+| Field | Source response | Normalized record | Stored result |
+|---|---|---|---|
+| Identity | `id: "mat-0002"` | `source_id: "mat-0002"` | Same source identity in SQLite and the reference receiver |
+| Weight | `weight: "250 gsm"` | `weight_gsm: 250.0` | Numeric weight in grams per square metre |
+| Width | Not supplied | `width_cm: null` | An explicit empty value |
+| Price | `price: "38.87"`, `currency: "USD"` | `price: {amount: "38.87", currency: "USD"}` | Amount and currency remain together |
+
+**Missing values are not guessed.** Mappings can try source fields in order. If none supplies a usable
+value, the result stays empty for its field type. Unparseable values without a usable fallback leave
+an entry in `issues`. A destination field marked `keep_existing` can retain its previous value when
+the incoming value is empty.
+
+<a id="try-it-in-60-seconds"></a>
+
+## Try the synthetic demo
+
+
+### Docker: one command
+
+Install and start Docker, download or clone this repository, then run this command from its root.
+Use a POSIX shell on macOS or Linux, or WSL with Docker integration on Windows.
+No host Python, service account or manual demo configuration is needed.
+
+```console
+$ sh tools/demo.sh
+```
+
+The first run builds the image and downloads dependencies. The demo then runs with external network
+access disabled: it starts the synthetic source and reference receiver, collects and normalizes the
+data, imports it into SQLite and the receiver, and repeats the imports to verify the result.
+
+**What you see:** a local HTML report with source values, normalized fields, imported records and
+verified counts: **24 materials, 9 suppliers, 24 matching receiver records**. Both material destinations
+are checked against the normalized records. Repeat imports must leave them unchanged, or the command
+fails. The report opens automatically when a desktop opener is available; its path is always printed.
+
+**Cleanup:** the launcher removes its temporary container and data volume on exit, including after a
+failed run. Only the report folder and cached `catalog-sync:demo` image remain. Delete the printed
+report folder when finished; `docker image rm catalog-sync:demo` removes the cached image.
+The original raw cache and synthetic login state are not exported to your computer.
+
+To choose an empty report directory or disable automatic opening, set `DEMO_OUTPUT_DIR` or
+`DEMO_OPEN_REPORT=0`. Existing non-empty output directories are refused. The optional
+[Compose stack](docs/deploy.md) covers the separate Postgres and scheduled deployment example.
+
+<details>
+<summary>Alternative: run each CLI step yourself</summary>
+
+### Step-by-step CLI
+
+**You need:** Python 3.11–3.13, `uv`, and a fresh checkout of this repository. Open a terminal at the
+repository root. Keep ports `8765` and `8780` free. The optional queries below use the `sqlite3` CLI.
+
+The demo starts a local synthetic SaaS and a reference HTTP receiver. It collects 24 materials and
+9 suppliers, normalizes their fields, and loads materials into both SQLite and the receiver.
+No real service account is needed. The example configuration already contains the demo declaration.
+
+The next block copies `catalog-sync.example.toml` to `catalog-sync.toml`, so use a fresh checkout
+without your own config. For an isolated demo, set `CATALOG_SYNC_HOME` to a new local directory
+outside cloud-synced folders before running it. The commands stop both demo services at the end.
+The `$` characters are shell prompts; copy the commands without them.
+
+<!-- ci:run -->
+```console
+$ uv sync
+$ cp catalog-sync.example.toml catalog-sync.toml
+$ uv run catalog-sync mock serve --detach --pid-file mock.pid
+$ uv run catalog-sync mock platform serve --detach --pid-file platform.pid --db out/platform.db
+$ uv run catalog-sync login mock --form
+$ uv run catalog-sync pull mock-materials
+$ uv run catalog-sync normalize mock-materials --out out/materials.jsonl
+$ uv run catalog-sync load --sink mock-materials-db --input out/materials.jsonl
+$ PLATFORM_TOKEN=demo-platform-token uv run catalog-sync load --sink mock-platform --input out/materials.jsonl
+$ uv run catalog-sync run mock-suppliers
+$ uv run catalog-sync audit show
+$ uv run catalog-sync mock stop --pid-file platform.pid
+$ uv run catalog-sync mock stop --pid-file mock.pid
+```
+
+<details>
+<summary>What each command does</summary>
+
+What the steps do:
+
+1. `mock serve --detach` starts the service in the background and returns once it is listening;
+   `mock stop` ends it. Its data is seeded and fake: 24 materials in a folder tree and 9 suppliers.
+2. `login mock --form` posts the demo account to the service's login and stores the bearer token it
+   answers with, in the workspace, readable by you only. No browser is involved, so CI can do it.
+3. `pull` walks the folder tree and fetches every material's detail record and its two pictures,
+   keeping the raw responses. `normalize` turns them into records of the built-in `material` schema,
+   offline, with the mapping the connector ships inside its own package: no `--mapping`, and no copy of
+   the source tree, is needed, so this block also works from an installed wheel. `load` writes them into SQLite (`{workspace}/out/mock.db`: a sink path that starts with
+   `{workspace}/` is resolved against the workspace, see below).
+4. `mock platform serve --detach` started the reference platform, which stores into `out/platform.db`
+   (an ordinary path, relative to where you run the command).
+   `load --sink mock-platform` sends the same records to it through the `http` sink, as batches of
+   JSON ([the HTTP sink](#your-platform-the-http-sink)). The token is read from the environment variable
+   the sink names; the demo token is the one the receiver accepts when it was given none. Its table is
+   named after the entity (`material`), not after the SQLite sink's default (`materials`).
+5. `run mock-suppliers` does the same three steps in one command for the second entity, which has a
+   different schema (`supplier`), a different kind of pagination (a next-page token) and no pictures.
+6. `audit show` lists what was done: counts and ids, never content or tokens.
+
+</details>
+
+**Inspect the result.** Query the databases after the demo services stop:
+
+```console
+$ WORKSPACE="${CATALOG_SYNC_HOME:-$HOME/.local/share/catalog-sync}"
+$ sqlite3 -header "$WORKSPACE/out/mock.db" "select source_id, code, name, weight_gsm from materials limit 3"
+$ sqlite3 -header "$WORKSPACE/out/mock.db" "select source_id, name, country, rating from suppliers limit 3"
+$ sqlite3 -header out/platform.db "select source_id, code, name, weight_gsm from material limit 3"
+```
+
+
+**A successful first trial:** the local database contains 24 materials and 9 suppliers; the reference
+receiver contains the same 24 materials. Inspect a `source_id` in both stores and compare its mapped
+fields. These are expected counts for the default synthetic dataset, not a performance benchmark.
+
+To check repeat imports, run the same `load --sink mock-materials-db` command again against the same
+normalized file, then query the database: the material count should remain 24. Use the
+[acceptance scenarios](docs/acceptance.md) to reproduce interruption recovery and field preservation.
+
+A supplier's e-mail address is marked `sensitive` in its mapping, so it is not in the database: a sink
+drops sensitive fields unless it is told to hash or keep them.
+
+State goes to `~/.local/share/catalog-sync` (the cache, the state database, credentials and the audit
+log) unless you set `CATALOG_SYNC_HOME` or pass `--workspace`. It is outside the repository on purpose:
+the cache holds other people's data.
+
+The file sinks write there too. A sink `path` that starts with `{workspace}/` is resolved against the
+workspace in use, so the records of a run do not end up in the checkout; any other relative path is
+resolved against the config file, as before. Only two files of the demo are ordinary paths, because they
+are command-line arguments and not sinks: `out/materials.jsonl` (the `normalize --out` file) and
+`out/platform.db` (the reference platform's own database). Both hold only the Mock's invented data, and
+`out/` is git-ignored. For a real source, give `--out` a path in the workspace as well.
+
+**Never point sinks at a cloud-synced folder (iCloud/Dropbox/OneDrive).** The records are other people's
+data, which a sync client would copy to servers you did not choose, and it can copy a SQLite file in the
+middle of a write.
+
+### Offline: replay a stored snapshot
+
+The repository also ships a synthetic snapshot (`examples/synthetic`, made of obviously fake data by
+`tools/make_synthetic.py`). The `replay` source serves it instead of calling an API, so not even a
+local server is needed. This block is run by the test suite on every change too. Unlike the block above it
+needs a checkout of the repository: the snapshot and the mapping the `demo` profile names are files in it,
+not in the installed package.
+
+<!-- ci:run -->
+```console
+$ uv run catalog-sync run demo
+$ uv run catalog-sync runs list
+$ uv run catalog-sync cache purge --dry-run
+```
+
+`run demo` pulls the snapshot, normalizes it with the Mock materials mapping, and loads three sinks:
+`{workspace}/out/catalog.db` (SQLite), `{workspace}/out/catalog.jsonl` and `{workspace}/out/catalog.csv`.
+`runs list` shows the runs in the workspace, and `cache purge --dry-run` what the retention policy would
+delete (nothing, yet).
+
+```console
+$ WORKSPACE="${CATALOG_SYNC_HOME:-$HOME/.local/share/catalog-sync}"
+$ sqlite3 -header "$WORKSPACE/out/catalog.db" "select source_id, code, name, weight_gsm from materials limit 3"
+```
+
+Run the pipeline step by step instead:
+
+```console
+$ uv run catalog-sync pull demo                      # raw responses into the workspace cache
+$ uv run catalog-sync normalize mock.materials --run latest --out records.jsonl
+$ uv run catalog-sync load --sink local --input records.jsonl --dry-run
+$ uv run catalog-sync load --sink local --input records.jsonl
+```
+
+</details>
+
+<a id="quick-start"></a>
+
+## Connect your own service
+
+Once the synthetic demo works, choose the parts you need to adapt:
+
+| Integration step | What you supply | Guide |
+|---|---|---|
+| Source | Authorization and an installed or custom Python connector for a compatible interface | [Connector guide](docs/connector-guide.md) |
+| Transformation | Field mappings, code tables and empty-value policy | [Data contract](docs/data-contract.md) |
+| Destination | A configured database sink, compatible HTTP receiver or custom adapter | [Platform contract](docs/platform-contract.md) |
+| Runtime | CLI execution or a Docker deployment with your configuration | [Deployment guide](docs/deploy.md) |
+
+For a service with a connector already installed, `init` walks through authorization, source settings,
+login, a sample pull and the destination. It does not create an integration for an unsupported service.
+Run it in a separate checkout/configuration from the demo:
 
 ```console
 $ uv sync
@@ -139,116 +303,71 @@ For a script or CI, give the answers as a file and ask for nothing:
 built-in Mock SaaS with a SQLite file and the reference platform as sinks, and the test suite runs it on
 every change.
 
-No account to try it with yet? The next section needs none.
+Return to the [synthetic demo](#try-the-synthetic-demo) to evaluate the workflow without a real account.
 
-## Try it in 60 seconds
+## Supported scope
 
-catalog-sync ships a fake SaaS to run against, the **Mock SaaS**. It has a login, paginated JSON
-APIs, detail records, pictures and the usual traps, and everything in it is invented: there is no
-account to create, no credential to protect and no terms to read. It is a networked source, so it
-goes through the compliance gate like a real one (the declaration for the demo is filled in, in the
-example config). The block also starts the **reference platform**, a stand-in for your own that
-implements the [platform contract](docs/platform-contract.md), and loads the same records into it
-over HTTP. It is run by the test suite on every change.
+| Area | First-release boundary |
+|---|---|
+| Entities | Material and supplier schemas; other business entities require an extension. |
+| Sources | Synthetic source and offline replay included. Real SaaS or enterprise services need a compatible connector and authorized access. |
+| Destinations | JSONL, CSV, SQLite, Postgres and HTTP. HTTP is validated against the included reference receiver; CSV has contract-test coverage, not the full acceptance scenarios. |
+| Missing values | Explicit fallback and empty-value policies; no inferred values. |
+| Access | No generic HTML scraping, JavaScript request-signature generation, CAPTCHA or unattended second-factor handling. |
+| Release evidence | Original frozen candidate: 18 local acceptance checks passed. Public-candidate GitHub CI is pending; see [tested environments and provenance](docs/acceptance.md). |
 
-<!-- ci:run -->
-```console
-$ uv sync
-$ cp catalog-sync.example.toml catalog-sync.toml
-$ uv run catalog-sync mock serve --detach --pid-file mock.pid
-$ uv run catalog-sync mock platform serve --detach --pid-file platform.pid --db out/platform.db
-$ uv run catalog-sync login mock --form
-$ uv run catalog-sync pull mock-materials
-$ uv run catalog-sync normalize mock-materials --out out/materials.jsonl
-$ uv run catalog-sync load --sink mock-materials-db --input out/materials.jsonl
-$ PLATFORM_TOKEN=demo-platform-token uv run catalog-sync load --sink mock-platform --input out/materials.jsonl
-$ uv run catalog-sync run mock-suppliers
-$ uv run catalog-sync audit show
-$ uv run catalog-sync mock stop --pid-file platform.pid
-$ uv run catalog-sync mock stop --pid-file mock.pid
+Docker packages the runtime. Source permissions, connector adaptation and receiver compatibility
+still need to be configured and validated for your system.
+
+## Share your trial feedback
+
+Tell us your source type, destination type, the step you reached and the first blocker. Include the
+release and environment used. A synthetic example or redacted schema is enough; do not include
+credentials, private endpoints or real business records. Use the repository's Issues tab once available.
+
+For deeper integration work: [configuration](#configuration-reference) · [commands](#command-reference) ·
+[custom sources and sinks](#writing-your-own-source-or-sink) · [contributing](CONTRIBUTING.md).
+
+## How it works
+
+```
+ SaaS tool                  catalog-sync                                        your platform
+ ---------    +-----------------------------------------------------+    -------------------
+              |  compliance gate: declaration valid? rate ceiling?  |
+   HTTP  ---> |  credential fresh?  (all checked before any call)   |
+              |                                                     |
+              |  collect         clean + normalize          load    |
+              |  pull  ------>  raw cache  ------>  mapping  ---> sinks ---> SQLite, Postgres,
+              |  (resumable)    (kept, offline)     + code tables   |        JSONL, CSV, HTTP, or yours
+              |                                                     |
+              |  audit log: one line per login, pull, normalize,    |
+              |  load, run and purge. Counts and ids, never content.|
+              +-----------------------------------------------------+
 ```
 
-What the steps do:
+1. **Collect** (`pull`). A *source* plugin lists the items, fetches each one's detail record and its
+   pictures, and the raw responses are stored under the workspace, one directory per run, with a
+   checksum for every file. A killed or failed pull is continued with `--resume`; a second pull only
+   fetches what changed. HTTP is paced (a declared ceiling per minute, enforced as a sliding window),
+   retried with backoff on 5xx and 429, and never retried on other 4xx.
+2. **Clean and normalize** (`normalize`). Reads only the cache, so it works offline and a changed
+   mapping can be tried again at once. A YAML *mapping* states, for each field of the record, which
+   raw values feed it (listing row and detail record are read side by side and never merged), how to
+   parse them, and whether it is `sensitive`. Code tables are per source and never merged.
+3. **Load** (`load`). A *sink* writes the records (a file, a database, or your platform over HTTP). Only the fields the mapping owns are written;
+   `NULL` is written as `NULL` unless the field is marked `keep_existing`; rows are never deleted
+   (rows the source no longer returns are reported); a backup is taken first; `--dry-run` shows
+   what would change and writes nothing. SQL sinks use `INSERT ... ON CONFLICT DO UPDATE`, so child
+   rows that cascade on delete survive a refresh.
+4. **Around all of it**: the **compliance gate** refuses to start a pull, or a login that makes a
+   request, without a valid declaration, and the **audit log** records what was done.
 
-1. `mock serve --detach` starts the service in the background and returns once it is listening;
-   `mock stop` ends it. Its data is seeded and fake: 24 materials in a folder tree and 9 suppliers.
-2. `login mock --form` posts the demo account to the service's login and stores the bearer token it
-   answers with, in the workspace, readable by you only. No browser is involved, so CI can do it.
-3. `pull` walks the folder tree and fetches every material's detail record and its two pictures,
-   keeping the raw responses. `normalize` turns them into records of the built-in `material` schema,
-   offline, with the mapping the connector ships inside its own package: no `--mapping`, and no copy of
-   the source tree, is needed, so this block also works from an installed wheel. `load` writes them into SQLite (`{workspace}/out/mock.db`: a sink path that starts with
-   `{workspace}/` is resolved against the workspace, see below).
-4. `mock platform serve --detach` started the reference platform, which stores into `out/platform.db`
-   (an ordinary path, relative to where you run the command).
-   `load --sink mock-platform` sends the same records to it through the `http` sink, as batches of
-   JSON ([the HTTP sink](#your-platform-the-http-sink)). The token is read from the environment variable
-   the sink names; the demo token is the one the receiver accepts when it was given none. Its table is
-   named after the entity (`material`), not after the SQLite sink's default (`materials`).
-5. `run mock-suppliers` does the same three steps in one command for the second entity, which has a
-   different schema (`supplier`), a different kind of pagination (a next-page token) and no pictures.
-6. `audit show` lists what was done: counts and ids, never content or tokens.
-
-Look at the result:
-
-```console
-$ WORKSPACE="${CATALOG_SYNC_HOME:-$HOME/.local/share/catalog-sync}"
-$ sqlite3 -header "$WORKSPACE/out/mock.db" "select source_id, code, name, weight_gsm from materials limit 3"
-$ sqlite3 -header "$WORKSPACE/out/mock.db" "select source_id, name, country, rating from suppliers limit 3"
-$ sqlite3 -header out/platform.db "select source_id, code, name, weight_gsm from material limit 3"
-```
-
-A supplier's e-mail address is marked `sensitive` in its mapping, so it is not in the database: a sink
-drops sensitive fields unless it is told to hash or keep them.
-
-State goes to `~/.local/share/catalog-sync` (the cache, the state database, credentials and the audit
-log) unless you set `CATALOG_SYNC_HOME` or pass `--workspace`. It is outside the repository on purpose:
-the cache holds other people's data.
-
-The file sinks write there too. A sink `path` that starts with `{workspace}/` is resolved against the
-workspace in use, so the records of a run do not end up in the checkout; any other relative path is
-resolved against the config file, as before. Only two files of the demo are ordinary paths, because they
-are command-line arguments and not sinks: `out/materials.jsonl` (the `normalize --out` file) and
-`out/platform.db` (the reference platform's own database). Both hold only the Mock's invented data, and
-`out/` is git-ignored. For a real source, give `--out` a path in the workspace as well.
-
-**Never point sinks at a cloud-synced folder (iCloud/Dropbox/OneDrive).** The records are other people's
-data, which a sync client would copy to servers you did not choose, and it can copy a SQLite file in the
-middle of a write.
-
-### Offline: replay a stored snapshot
-
-The repository also ships a synthetic snapshot (`examples/synthetic`, made of obviously fake data by
-`tools/make_synthetic.py`). The `replay` source serves it instead of calling an API, so not even a
-local server is needed. This block is run by the test suite on every change too. Unlike the block above it
-needs a checkout of the repository: the snapshot and the mapping the `demo` profile names are files in it,
-not in the installed package.
-
-<!-- ci:run -->
-```console
-$ uv run catalog-sync run demo
-$ uv run catalog-sync runs list
-$ uv run catalog-sync cache purge --dry-run
-```
-
-`run demo` pulls the snapshot, normalizes it with the Mock materials mapping, and loads three sinks:
-`{workspace}/out/catalog.db` (SQLite), `{workspace}/out/catalog.jsonl` and `{workspace}/out/catalog.csv`.
-`runs list` shows the runs in the workspace, and `cache purge --dry-run` what the retention policy would
-delete (nothing, yet).
-
-```console
-$ WORKSPACE="${CATALOG_SYNC_HOME:-$HOME/.local/share/catalog-sync}"
-$ sqlite3 -header "$WORKSPACE/out/catalog.db" "select source_id, code, name, weight_gsm from materials limit 3"
-```
-
-Run the pipeline step by step instead:
-
-```console
-$ uv run catalog-sync pull demo                      # raw responses into the workspace cache
-$ uv run catalog-sync normalize mock.materials --run latest --out records.jsonl
-$ uv run catalog-sync load --sink local --input records.jsonl --dry-run
-$ uv run catalog-sync load --sink local --input records.jsonl
-```
+The output contract (entities and schema versions, the normalized file, the `(source, source_id)` key,
+provenance, field tables, empty-value rules, issue codes, sensitive policy, failure handling, owned
+fields and `keep_existing`, backups and audit) is in [docs/data-contract.md](docs/data-contract.md). A
+generated side-by-side run for materials and suppliers, from the Mock SaaS through SQLite and the
+reference platform, is in [examples/contract/](examples/contract/) and is checked against the code by a
+test.
 
 ## Connectors
 
@@ -731,7 +850,7 @@ $ uv run pytest -q
 ```
 
 Tests run with sockets disabled and only synthetic data; the ones that start a Mock SaaS may reach
-`127.0.0.1` and nothing else. CI runs them on Python 3.11, 3.12 and 3.13, type-checks with
+`127.0.0.1` and nothing else. The CI workflow is configured to run them on Python 3.11, 3.12 and 3.13, type-checks with
 `mypy --strict`, runs the Postgres sink against a `postgres:16` service container, and runs the
 commands of the demos above exactly as written. See [CONTRIBUTING.md](CONTRIBUTING.md) for the rules, including the one that every new check needs a
 test that makes it fail.

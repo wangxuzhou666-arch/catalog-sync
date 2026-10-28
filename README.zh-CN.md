@@ -2,109 +2,110 @@
 
 [English](README.md) | 简体中文
 
-**把获授权的业务数据接进你自己的平台：采集 → 清洗 → 标准化 → 导入。**
+**把外部平台的数据，接入你自己的业务系统。**
 
-catalog-sync 面向平台与数据团队。你可以为 SaaS API 或企业内部数据服务适配连接器，配置字段映射，
-再把记录写入数据库或实现接收端契约的业务应用。整条流程可以用命令行或 Docker 运行。
+在取得授权的前提下，采集外部数据、清洗并统一字段，再导入自己的数据库或业务平台。
+来源更新后，按同一套规则再次运行。
 
-采集中断后可以续传；清洗规则变化时，可利用保留的原始数据离线重跑；导入只更新属于同步任务的字段，
-保留平台自有字段和子表记录。每次运行记录进度和失败原因。访问服务前必须提供授权声明，使用者负责取得实际许可。
+面向需要把 SaaS 或企业数据服务接入自有平台的技术团队。第一版从商品／物料和供应商记录开始：
+启动 Docker 后，一条命令完成合成数据的采集、清洗和导入，并打开结果报告；体验后再适配自己的来源和目标。
 
-> 当前为候选版本，接口可能变化。公开仓库提供框架、模拟服务和离线回放；真实服务的连接器由使用者独立提供。
-> 先运行内置 Mock SaaS，无需真实账号即可验证完整链路。已验证范围与证据见 [验收说明](docs/acceptance.md)。
+**[运行示例](#运行合成数据示例)** · [看一条数据如何落地](#一条数据从来源到目标) ·
+[接入自己的服务](#接入自己的服务) · [在 Docker 中运行](docs/deploy.md)
 
-- [为什么需要它](#为什么需要它) · [工作方式](#工作方式) · [快速开始](#快速开始) · [60 秒体验](#60-秒体验) · [连接器](#连接器)
-- [配置参考](#配置参考) · [命令参考](#命令参考)
-- [编写自己的数据源或目标端](#编写自己的数据源或目标端) · [编写连接器](docs/connector-guide.md)
-- [负责任地使用](#负责任地使用) · [安全](#安全) · [开发](#开发)
+> **v0.1.0rc1 · 候选版本。** 包含框架、合成数据源、离线回放和参考 HTTP 接收端。
+> 接入真实服务需要安装或编写 Python 连接器。已验证范围与限制见[验收说明](docs/acceptance.md)。
 
 ## 为什么需要它
 
-- **官方导出缺失或不完整。** 很多 SaaS 产品让你在网页应用里看到数据，却没有把数据取出来的办法，或者导出的内容缺你需要的字段。
-  网页应用本身是调用 API 的；用你自己的账号登录，就能读到你本来就能看到的内容。
-- **字段对不上。** 服务端怎么称呼一个字段、怎么书写克重、幅宽、价格、成分，用的是什么编码，都和你平台里存的不一样。
-  这里的清洗是显式的：每个字段一条映射规则，每个数据源一套编码表；无法理解的值会变成 `null`，并在 `issues` 里留一条记录，绝不猜测。
-- **接入必须可审计。** 总会有人问：谁批准的？读过哪些条款？访问频率多高？拷贝了什么？什么时候该删？
-  答案应该留在工具自己的记录里，而不是靠某个人的记忆。
+能访问外部服务，只是开始。自己的业务系统还需要统一格式的记录、可以重复执行的导入，以及明确的数据更新规则。
 
-## 工作方式
+| 团队遇到的问题 | catalog-sync 提供的机制 | 对接入工作的价值 |
+|---|---|---|
+| 来源字段与自己的平台不一致 | 显式字段映射、单位解析、按来源划分的编码表 | 把整理规则写成可以重复执行的配置。 |
+| 采集中途失败 | 保存进度、支持续传 | 从已完成的工作继续。 |
+| 采完才发现清洗规则要改 | 保留原始响应、支持离线重新清洗 | 不必为了改映射再采集一遍。 |
+| 再次导入时可能重复或覆盖平台内容 | 记录标识、更新策略和字段归属 | 重复导入时保留平台自己维护的字段。 |
+| 一批数据没有完整处理 | 条目失败、解析问题和审计记录 | 找到下次运行前需要处理的对象。 |
+
+完整链路：**获授权的服务 → 连接器 → 原始缓存 → 清洗、字段统一与空值处理 → 标准记录 → 自有数据库或接收端**。
 
 ```
- SaaS tool                  catalog-sync                                        your platform
- ---------    +-----------------------------------------------------+    -------------------
-              |  compliance gate: declaration valid? rate ceiling?  |
-   HTTP  ---> |  credential fresh?  (all checked before any call)   |
-              |                                                     |
-              |  collect         clean + normalize          load    |
-              |  pull  ------>  raw cache  ------>  mapping  ---> sinks ---> SQLite, Postgres,
-              |  (resumable)    (kept, offline)     + code tables   |        JSONL, CSV, HTTP, or yours
-              |                                                     |
-              |  audit log: one line per login, pull, normalize,    |
-              |  load, run and purge. Counts and ids, never content.|
-              +-----------------------------------------------------+
+Authorized SaaS / enterprise service
+               ↓
+        Source connector
+               ↓
+           Raw cache  ← replay when mappings change
+               ↓
+     Clean · map · handle empty values
+               ↓
+       Normalized records
+               ↓
+   Your database / application receiver
 ```
 
-1. **采集**（`pull`）。*数据源*（source）插件列出所有条目，取回每个条目的详情记录和图片；原始响应按运行（run）分目录保存在工作区里，
-   每个文件都有校验和。被中断或失败的拉取用 `--resume` 继续；再次拉取只会取回有变化的部分。HTTP 请求按你声明的上限限速
-   （每分钟上限，以滑动窗口强制执行），遇到 5xx 和 429 时指数退避重试，其他 4xx 不重试。
-2. **清洗与规范化**（`normalize`）。只读缓存，所以可以离线运行，改了映射马上就能重跑。一份 YAML *映射*（mapping）逐字段写明：
-   由哪些原始值供给、怎么解析、是否 `sensitive`（敏感）。列表行和详情记录并排读取，从不合并；编码表按数据源区分，从不混用。
-3. **入库**（`load`）。*目标端*（sink）负责写入记录（文件、数据库，或通过 HTTP 送到你的平台）。只写映射声明“拥有”的字段；`NULL` 就写成 `NULL`，除非该字段标了
-   `keep_existing`；从不删除行（源端不再返回的行只做报告）；写入前先备份；`--dry-run` 只展示将会发生什么，不写任何东西。
-   SQL 目标端使用 `INSERT ... ON CONFLICT DO UPDATE`，所以带级联删除的子表行在刷新后依然存在。
-4. **贯穿全程**：**合规闸门**在没有有效声明时拒绝开始拉取，也拒绝会发出请求的登录；**审计日志**记录做过什么。
+你配置来源、字段规则和接收目标，框架负责串起整个过程。[数据契约](docs/data-contract.md)明确了空值、失败和更新的含义。
 
-输出契约（实体与 schema 版本、规范化文件、`(source, source_id)` 键、来源（provenance）、字段表、空值规则、问题代码（issue codes）、敏感字段策略、失败处理、拥有的字段与 `keep_existing`、备份与审计）见 [docs/data-contract.md](docs/data-contract.md)。
-[examples/contract/](examples/contract/) 里有一份生成出来的并排运行结果，覆盖物料（materials）和供应商（suppliers），从 Mock SaaS 经 SQLite 一路到参考平台，并由一个测试与代码核对。
+## 一条数据，从来源到目标
 
-## 快速开始
+下面使用仓库已有的[契约示例](examples/contract/materials/cases/mat-0002.json)，全部是**合成数据**。
+同一个来源标识贯穿采集、清洗和导入。
 
-要把公司在某个 SaaS 工具里的数据接入自己的平台，catalog-sync 只需要你给三样东西：数据要去的**平台地址**（或数据库）、
-数据来源工具的**登录方式**，以及读取这些数据的**授权**。`catalog-sync init` 一步一步地问你，逐项确认能用，最后写出配置文件：
+| 字段 | 来源响应 | 标准记录 | 导入结果 |
+|---|---|---|---|
+| 标识 | `id: "mat-0002"` | `source_id: "mat-0002"` | SQLite 和参考接收端保留相同来源标识 |
+| 克重 | `weight: "250 gsm"` | `weight_gsm: 250.0` | 以克／平方米表示的数值 |
+| 幅宽 | 来源没有提供 | `width_cm: null` | 明确保留为空 |
+| 价格 | `price: "38.87"`, `currency: "USD"` | `price: {amount: "38.87", currency: "USD"}` | 金额与币种一起保留 |
+
+**缺失值不会被猜出来。** 映射可以依次尝试多个来源字段；没有可用值时，按字段类型保留为空。
+无法解析且没有可用后备值时，在 `issues` 中留下问题记录。目标字段配置 `keep_existing` 后，
+可以在新值为空时保留原有值。
+
+<a id="60-秒体验"></a>
+
+## 运行合成数据示例
+
+
+### Docker 一条命令体验
+
+安装并启动 Docker，下载或克隆本仓库后，在仓库根目录执行下面的命令。
+支持 macOS、Linux 的 POSIX shell；Windows 使用已接通 Docker 的 WSL。
+电脑上不需要安装 Python，也不需要真实服务账号或手动填写演示配置。
 
 ```console
-$ uv sync
-$ uv run catalog-sync init
+$ sh tools/demo.sh
 ```
 
-它依次做这些事：
+首次运行会构建镜像并下载依赖。随后在禁止访问外网的隔离容器内启动模拟来源和参考接收端，
+完成采集、清洗、导入 SQLite 与接收端，再重复导入验证结果。
 
-1. **选连接器。** 列出已安装的所有连接器，每个一行说明；连接器自己的设置（比如服务的地址）按它的声明来问。
-2. **逐项填写合规声明**，每一项都附说明：数据归谁、凭什么授权读取（`own_account`、`customer_authorized`、`contract`、`public_data`）
-   以及授权记录在哪、你读过的条款、你会遵守的请求频率、原始缓存最长保留多久。每个回答都用闸门同样的规则校验。
-   条款审阅日期**只有在你确认读过条款之后才会默认为今天**：`init` 不会替你选日期，没读过就在发出任何请求之前停下。
-3. **登录**，用连接器提供的方式之一：HTTP 登录（`--form`）、浏览器（`--browser`，需要人输入时开可见窗口）、或粘贴 cURL 命令。
-   账号来自环境变量，从不写进文件。
-4. **写文件之前先看一眼。** `inspect` 数据源，拉一个小**样本**（默认 5 条），并以表格展示**规范化**后的结果，令牌已遮蔽，`sensitive` 字段不显示。
-5. **选择记录去哪**：SQLite、Postgres、通过 HTTP 送到你的平台（见[平台契约](docs/platform-contract.md)）、JSONL 或 CSV。
-   它从不向你要密钥：需要令牌或连接串的地方，你只填存放它的**环境变量名**。
-6. **最后写出 `catalog-sync.toml`**，并打印要执行的命令。已有同名文件时，没有 `--force` 就不会覆盖；文件里绝不会写入任何密钥。
+**你会看到：** 一份本地 HTML 报告，展示来源原值、清洗后的字段、实际导入记录，以及验证数量：
+**24 条物料、9 条供应商、接收端 24 条对应物料**。程序会对照标准记录核验两个物料目标端，
+重复导入后内容也必须保持不变，否则命令报错退出。支持桌面打开命令时会自动打开报告，终端始终打印报告路径。
 
-登录、样本拉取和规范化各自会在审计日志里留下原有的记录，`init` 再加一条自己的。
+**清理：** 无论成功还是失败，启动脚本退出时都会清理本次临时容器和数据卷。
+仅保留报告目录与缓存镜像 `catalog-sync:demo`。看完后可以删除终端显示的报告目录；
+运行 `docker image rm catalog-sync:demo` 可删除缓存镜像。原始缓存和模拟登录状态不会导出到电脑上。
 
-`init` 做不到的事，先说清楚，免得意外：
+如需指定一个空的报告目录，设置 `DEMO_OUTPUT_DIR`；设置 `DEMO_OPEN_REPORT=0` 可关闭自动打开。
+已有内容的输出目录会被拒绝，不会覆盖。另有可选的 [Compose 部署示例](docs/deploy.md)，
+用于独立 Postgres 服务及定时运行。
 
-- **它只问连接器标为必填、或几乎人人都要设置的项**（比如服务的地址）。其余设置一律保持默认值，事后在文件里改。
-- **没有声明设置的连接器，会被如实标出**，`init` 也就没有什么可问：它的 `[sources.NAME]` 表得手写
-  （[示例配置](catalog-sync.example.toml)给出了格式；连接器怎样声明设置，见[连接器指南](docs/connector-guide.md)）。
-- **`--non-interactive` 要求每个回答都给齐。** 没有回答又没有默认值的问题会报错并指出键名。合规声明的回答刻意不设默认值：
-  它们是只有你才能作出的事实陈述。
-- **样本拉取是一次真实的运行。** 它向真实的服务发真实的请求，写入原始缓存和审计日志，所以合规声明排在它前面。
-- **它打印出 `run` 命令就结束。** 它不做任何定时安排：把那条命令交给 cron、systemd 定时器或你自己的任务调度去调用，是你的事（[docs/deploy.md](docs/deploy.md) 说明了怎么做，附带容器镜像和 compose 栈）。
-- **它无法判断你的声明是否属实**，只能检查它是否完整、前后一致（[这之后留给你的是什么](docs/compliance.md)）。
+<details>
+<summary>其他方式：逐步运行命令行示例</summary>
 
-脚本或 CI 里，把回答写进文件，一个问题都不问：`catalog-sync init --answers answers.toml --non-interactive`。
-[`examples/init/mock-materials.toml`](examples/init/mock-materials.toml) 列出了所有的键；它把内置的 Mock SaaS 配好，
-目标端是一个 SQLite 文件和参考平台，测试套件在每次改动时都会运行它。
+### 逐步运行 CLI
 
-还没有可以拿来试的账号？下一节不需要任何账号。
+**准备条件：** Python 3.11–3.13、`uv` 和本仓库的一份全新检出。在仓库根目录打开终端，
+确保端口 `8765`、`8780` 空闲。下方可选的查询命令需要 `sqlite3` 命令行工具。
 
-## 60 秒体验
+示例启动本地模拟 SaaS 和参考 HTTP 接收端，采集 24 条物料、9 条供应商记录，清洗字段，
+再将物料同时导入 SQLite 和参考接收端。无需真实服务账号，示例配置中已填好演示用声明。
 
-catalog-sync 自带一个可以拿来对着跑的假 SaaS：**Mock SaaS**。它有登录、分页的 JSON API、详情记录、图片和常见的各种“陷阱”，
-里面的一切都是虚构的：不用注册账号，没有凭证需要保护，也没有条款要读。它是一个联网数据源，所以和真实数据源一样要过合规闸门
-（演示用的声明已经填在示例配置里）。这个代码块还会启动**参考平台**，它是你自己平台的替身，实现了[平台契约](docs/platform-contract.md)，
-并把同样的记录通过 HTTP 入库到它里面。测试套件在每次改动时都会原样执行它。
+下面会把 `catalog-sync.example.toml` 复制为 `catalog-sync.toml`，请使用还没有自定义配置的全新检出。
+需要隔离演示数据时，先将 `CATALOG_SYNC_HOME` 设置为云同步目录之外的一个新本地目录。
+命令最后会停止两个演示服务。`$` 是终端提示符，复制命令时不包含它。
 
 <!-- ci:run -->
 ```console
@@ -123,6 +124,9 @@ $ uv run catalog-sync mock stop --pid-file platform.pid
 $ uv run catalog-sync mock stop --pid-file mock.pid
 ```
 
+<details>
+<summary>展开每条命令的作用</summary>
+
 各步骤做了什么：
 
 1. `mock serve --detach` 在后台启动这个服务，监听就绪后才返回；`mock stop` 结束它。它的数据由种子生成，全是假的：
@@ -137,7 +141,9 @@ $ uv run catalog-sync mock stop --pid-file mock.pid
 5. `run mock-suppliers` 用一条命令完成第二种实体的同样三步；它的 schema 不同（`supplier`），分页方式不同（游标），也没有图片。
 6. `audit show` 列出做过的事：只有计数和 id，没有内容，也没有令牌。
 
-看看结果：
+</details>
+
+**查看导入结果。** 演示服务停止后，仍可查询数据库：
 
 ```console
 $ WORKSPACE="${CATALOG_SYNC_HOME:-$HOME/.local/share/catalog-sync}"
@@ -145,6 +151,13 @@ $ sqlite3 -header "$WORKSPACE/out/mock.db" "select source_id, code, name, weight
 $ sqlite3 -header "$WORKSPACE/out/mock.db" "select source_id, name, country, rating from suppliers limit 3"
 $ sqlite3 -header out/platform.db "select source_id, code, name, weight_gsm from material limit 3"
 ```
+
+
+**第一次试用的完成标志：** 本地数据库里有 24 条物料、9 条供应商记录；参考接收端里有相同的 24 条物料。
+选一个 `source_id`，对照两边的映射字段。这是默认合成数据集的预期数量，不是性能测试结果。
+
+想验证重复导入，可以再次执行同一条 `load --sink mock-materials-db` 命令，导入同一份标准记录文件，
+再查询数据库：物料数量应仍为 24。中断续传和平台字段保护的复现步骤见[验收场景](docs/acceptance.md)。
 
 供应商的邮箱地址在它的映射里标了 `sensitive`，所以不会出现在数据库里：目标端会丢弃敏感字段，除非明确要求哈希或保留。
 
@@ -187,6 +200,113 @@ $ uv run catalog-sync normalize mock.materials --run latest --out records.jsonl
 $ uv run catalog-sync load --sink local --input records.jsonl --dry-run
 $ uv run catalog-sync load --sink local --input records.jsonl
 ```
+
+</details>
+
+<a id="快速开始"></a>
+
+## 接入自己的服务
+
+合成数据示例跑通后，再确定自己的系统需要适配哪几部分：
+
+| 接入步骤 | 你需要提供的内容 | 指南 |
+|---|---|---|
+| 来源 | 访问授权，以及适配来源接口的已安装或自定义 Python 连接器 | [连接器指南](docs/connector-guide.md) |
+| 清洗 | 字段映射、编码表和空值处理策略 | [数据契约](docs/data-contract.md) |
+| 目标 | 已配置的数据库目标端、兼容 HTTP 接收端或自定义适配器 | [平台契约](docs/platform-contract.md) |
+| 运行 | 命令行运行，或携带配置的 Docker 部署 | [部署指南](docs/deploy.md) |
+
+已有连接器时，`init` 会引导你填写授权、来源参数、登录方式、试采集和接收目标。
+它不会自动为尚未支持的服务生成接入能力。请在与示例分开的检出／配置中运行：
+
+```console
+$ uv sync
+$ uv run catalog-sync init
+```
+
+它依次做这些事：
+
+1. **选连接器。** 列出已安装的所有连接器，每个一行说明；连接器自己的设置（比如服务的地址）按它的声明来问。
+2. **逐项填写合规声明**，每一项都附说明：数据归谁、凭什么授权读取（`own_account`、`customer_authorized`、`contract`、`public_data`）
+   以及授权记录在哪、你读过的条款、你会遵守的请求频率、原始缓存最长保留多久。每个回答都用闸门同样的规则校验。
+   条款审阅日期**只有在你确认读过条款之后才会默认为今天**：`init` 不会替你选日期，没读过就在发出任何请求之前停下。
+3. **登录**，用连接器提供的方式之一：HTTP 登录（`--form`）、浏览器（`--browser`，需要人输入时开可见窗口）、或粘贴 cURL 命令。
+   账号来自环境变量，从不写进文件。
+4. **写文件之前先看一眼。** `inspect` 数据源，拉一个小**样本**（默认 5 条），并以表格展示**规范化**后的结果，令牌已遮蔽，`sensitive` 字段不显示。
+5. **选择记录去哪**：SQLite、Postgres、通过 HTTP 送到你的平台（见[平台契约](docs/platform-contract.md)）、JSONL 或 CSV。
+   它从不向你要密钥：需要令牌或连接串的地方，你只填存放它的**环境变量名**。
+6. **最后写出 `catalog-sync.toml`**，并打印要执行的命令。已有同名文件时，没有 `--force` 就不会覆盖；文件里绝不会写入任何密钥。
+
+登录、样本拉取和规范化各自会在审计日志里留下原有的记录，`init` 再加一条自己的。
+
+`init` 做不到的事，先说清楚，免得意外：
+
+- **它只问连接器标为必填、或几乎人人都要设置的项**（比如服务的地址）。其余设置一律保持默认值，事后在文件里改。
+- **没有声明设置的连接器，会被如实标出**，`init` 也就没有什么可问：它的 `[sources.NAME]` 表得手写
+  （[示例配置](catalog-sync.example.toml)给出了格式；连接器怎样声明设置，见[连接器指南](docs/connector-guide.md)）。
+- **`--non-interactive` 要求每个回答都给齐。** 没有回答又没有默认值的问题会报错并指出键名。合规声明的回答刻意不设默认值：
+  它们是只有你才能作出的事实陈述。
+- **样本拉取是一次真实的运行。** 它向真实的服务发真实的请求，写入原始缓存和审计日志，所以合规声明排在它前面。
+- **它打印出 `run` 命令就结束。** 它不做任何定时安排：把那条命令交给 cron、systemd 定时器或你自己的任务调度去调用，是你的事（[docs/deploy.md](docs/deploy.md) 说明了怎么做，附带容器镜像和 compose 栈）。
+- **它无法判断你的声明是否属实**，只能检查它是否完整、前后一致（[这之后留给你的是什么](docs/compliance.md)）。
+
+脚本或 CI 里，把回答写进文件，一个问题都不问：`catalog-sync init --answers answers.toml --non-interactive`。
+[`examples/init/mock-materials.toml`](examples/init/mock-materials.toml) 列出了所有的键；它把内置的 Mock SaaS 配好，
+目标端是一个 SQLite 文件和参考平台，测试套件在每次改动时都会运行它。
+
+无需真实账号即可先运行[合成数据示例](#运行合成数据示例)。
+
+## 支持范围
+
+| 范围 | 第一版的边界 |
+|---|---|
+| 实体 | 物料和供应商；其他业务实体需要扩展。 |
+| 来源 | 内置合成数据源和离线回放。真实 SaaS 或企业服务需要兼容连接器与访问授权。 |
+| 目标 | JSONL、CSV、SQLite、Postgres、HTTP。HTTP 已验证仓内参考接收端；CSV 有契约测试，未覆盖完整验收场景。 |
+| 缺失值 | 按显式规则使用后备字段或保留为空，不推测数据。 |
+| 访问方式 | 不支持通用 HTML 抓取、生成 JavaScript 请求签名、验证码或无人处理的二次验证。 |
+| 发布证据 | 原冻结候选的本地 18 项验收通过；公开候选的 GitHub CI 待运行。见[已测环境与版本说明](docs/acceptance.md)。 |
+
+Docker 打包运行环境。来源权限、连接器适配和接收端兼容性，仍需按你的系统配置和验证。
+
+## 反馈试用情况
+
+请说明来源类型、目标类型、执行到哪一步、遇到的第一个阻塞，以及使用的版本和环境。
+提供合成示例或脱敏后的字段结构即可，不要上传凭证、私有地址或真实业务记录。
+仓库公开后，可通过 Issues 提交。
+
+继续接入时可查阅：[配置参考](#配置参考) · [命令参考](#命令参考) ·
+[自定义来源与目标](#编写自己的数据源或目标端) · [贡献指南](CONTRIBUTING.md)。
+
+## 工作方式
+
+```
+ SaaS tool                  catalog-sync                                        your platform
+ ---------    +-----------------------------------------------------+    -------------------
+              |  compliance gate: declaration valid? rate ceiling?  |
+   HTTP  ---> |  credential fresh?  (all checked before any call)   |
+              |                                                     |
+              |  collect         clean + normalize          load    |
+              |  pull  ------>  raw cache  ------>  mapping  ---> sinks ---> SQLite, Postgres,
+              |  (resumable)    (kept, offline)     + code tables   |        JSONL, CSV, HTTP, or yours
+              |                                                     |
+              |  audit log: one line per login, pull, normalize,    |
+              |  load, run and purge. Counts and ids, never content.|
+              +-----------------------------------------------------+
+```
+
+1. **采集**（`pull`）。*数据源*（source）插件列出所有条目，取回每个条目的详情记录和图片；原始响应按运行（run）分目录保存在工作区里，
+   每个文件都有校验和。被中断或失败的拉取用 `--resume` 继续；再次拉取只会取回有变化的部分。HTTP 请求按你声明的上限限速
+   （每分钟上限，以滑动窗口强制执行），遇到 5xx 和 429 时指数退避重试，其他 4xx 不重试。
+2. **清洗与规范化**（`normalize`）。只读缓存，所以可以离线运行，改了映射马上就能重跑。一份 YAML *映射*（mapping）逐字段写明：
+   由哪些原始值供给、怎么解析、是否 `sensitive`（敏感）。列表行和详情记录并排读取，从不合并；编码表按数据源区分，从不混用。
+3. **入库**（`load`）。*目标端*（sink）负责写入记录（文件、数据库，或通过 HTTP 送到你的平台）。只写映射声明“拥有”的字段；`NULL` 就写成 `NULL`，除非该字段标了
+   `keep_existing`；从不删除行（源端不再返回的行只做报告）；写入前先备份；`--dry-run` 只展示将会发生什么，不写任何东西。
+   SQL 目标端使用 `INSERT ... ON CONFLICT DO UPDATE`，所以带级联删除的子表行在刷新后依然存在。
+4. **贯穿全程**：**合规闸门**在没有有效声明时拒绝开始拉取，也拒绝会发出请求的登录；**审计日志**记录做过什么。
+
+输出契约（实体与 schema 版本、规范化文件、`(source, source_id)` 键、来源（provenance）、字段表、空值规则、问题代码（issue codes）、敏感字段策略、失败处理、拥有的字段与 `keep_existing`、备份与审计）见 [docs/data-contract.md](docs/data-contract.md)。
+[examples/contract/](examples/contract/) 里有一份生成出来的并排运行结果，覆盖物料（materials）和供应商（suppliers），从 Mock SaaS 经 SQLite 一路到参考平台，并由一个测试与代码核对。
 
 ## 连接器
 
@@ -603,7 +723,7 @@ $ uv run python tools/check_nesting.py src tools
 $ uv run pytest -q
 ```
 
-测试在禁用套接字的条件下运行，只使用合成数据；启动 Mock SaaS 的测试只允许访问 `127.0.0.1`，别的一概不通。CI 在 Python 3.11、3.12 和 3.13 上运行测试，
+测试在禁用套接字的条件下运行，只使用合成数据；启动 Mock SaaS 的测试只允许访问 `127.0.0.1`，别的一概不通。CI 工作流配置为在 Python 3.11、3.12 和 3.13 上运行测试，
 用 `mypy --strict` 做类型检查，用 `postgres:16` 服务容器测试 Postgres 目标端，并且把上面各个演示里的命令原样执行一遍。规则见 [CONTRIBUTING.md](CONTRIBUTING.md)，其中包括：每一道新增的检查，都要有一个能让它失败的测试。
 
 从干净安装出发的验收运行（构建软件包、装进全新环境，再用装好的程序跑完断点续拉、重跑、部分失败、敏感值和 Postgres 等场景）见 [docs/acceptance.md](docs/acceptance.md)，其中有一次完整的运行记录和它所覆盖的范围。
