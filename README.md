@@ -8,9 +8,11 @@ For technical teams connecting SaaS or enterprise data services to their own app
 
 For example, bring an authorized supplier catalog into an internal purchasing system, with consistent units and repeatable updates.
 
-### The problem
+### Who it is for
 
-Getting access to external data is only the start. Your team still needs to align fields, clean formats and handle failed or repeated imports. catalog-sync brings those steps into one workflow with explicit, reusable rules and a record of what happened.
+- **Platform and backend teams** bringing authorized external records into purchasing, supplier management or other business applications.
+- **Data engineers and integration teams** replacing one-off import scripts with repeatable mappings, recovery and update rules.
+- **Python developers** building reusable connectors or receiving adapters for the services their teams use.
 
 ### What it helps you do
 
@@ -48,5 +50,15 @@ The first version covers material and supplier records, with the framework, synt
 The candidate code passed Python 3.11–3.13 checks, the Docker workflow and **18 acceptance checks**. See [tested scope and limitations](docs/acceptance.md); this does not establish compatibility with arbitrary external services.
 
 [Full user guide](docs/README.md) · [Build a connector](docs/connector-guide.md) · [Data rules](docs/data-contract.md) · [Receiver contract](docs/platform-contract.md) · [Deployment](docs/deploy.md)
+
+### Build the next connection together
+
+Contributions can start with:
+
+- **More sources and destinations:** connectors for authorized APIs and adapters for business application receivers.
+- **Better normalization:** mappings, unit handling and synthetic examples for new data shapes.
+- **An easier first run:** clearer documentation, reproducible bug reports and small fixes.
+
+Start an [issue](https://github.com/wangxuzhou666-arch/catalog-sync/issues) describing your source, destination and the gap you encountered. Discuss the scope, then submit a focused pull request using the [contribution guide](CONTRIBUTING.md). Use synthetic examples, never real credentials or customer data. You are welcome to help maintain the connectors, tests and documentation you contribute.
 
 Only process data you are authorized to access and export, and follow the source service's terms. [Responsible use](docs/compliance.md) · [Security](SECURITY.md) · [License](LICENSE)

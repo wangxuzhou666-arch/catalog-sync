@@ -78,7 +78,7 @@ rule without such a test will be asked for one.
 A connector is a Python package that registers a source under the `catalog_sync.sources` entry-point
 group. Start with `catalog-sync new-connector NAME`, which writes one that already passes its own tests,
 and follow [docs/connector-guide.md](docs/connector-guide.md) from the browser's network tab to the first
-live pull; the interface is described in *Writing your own source or sink* in the README. Build on
+live pull; the interface is described in [Writing your own source or sink](docs/README.md#writing-your-own-source-or-sink). Build on
 `catalog_sync.sdk` (options, connection, pagination, folder walk, pictures, credentials): what the shipped
 connectors and the scaffold share lives there, so the next one does not copy it again. Whatever it talks
 to, it must:
